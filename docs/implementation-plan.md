@@ -58,12 +58,12 @@ PHASE 2 IMPLEMENTATION SEQUENCE
 - [ ] **Step 17: Interactive Lead Generation (`patterns/quote-form-cta.php`, `patterns/faq-accordion.php`)**
 - [ ] **Step 18: Pricing & Career Components (`patterns/pricing-tables.php`, `patterns/career-openings.php`)**
 
-### Stage 5: Full Site Templates & Page Assembly
-- [ ] **Step 19: Homepage Template (`templates/front-page.html`)**
-- [ ] **Step 20: Services Archive & Single Service (`templates/archive-service.html`, `templates/single-service.html`)**
-- [ ] **Step 21: Projects Archive & Single Project (`templates/archive-project.html`, `templates/single-project.html`)**
-- [ ] **Step 22: Blog Archive, Single Post, Author & Search (`templates/archive.html`, `templates/single.html`, `templates/search.html`)**
-- [ ] **Step 23: Specialized Pages (`templates/page-about.html`, `templates/page-pricing.html`, `templates/page-contact.html`, `templates/404.html`)**
+### Stage 5: Full Site Editing Templates & Inner Pages
+- [x] **Step 19: Homepage Assembly (`templates/front-page.html`)** (Completed in Phase 5)
+- [x] **Step 20: Archive Templates (`templates/archive-service.html`, `templates/archive-project.html`, `templates/archive-team_member.html`, `templates/archive-career.html`, `templates/archive.html`)** (Completed in Phase 6)
+- [x] **Step 21: Single Item Templates (`templates/single-service.html`, `templates/single-project.html`, `templates/single-team_member.html`, `templates/single-career.html`, `templates/single.html`)** (Completed in Phase 6)
+- [x] **Step 22: Institutional Page Templates (`templates/page-about.html`, `templates/page-contact.html`, `templates/page-pricing.html`, `templates/page.html`)** (Completed in Phase 6)
+- [x] **Step 23: Taxonomy & Utility Templates (`templates/taxonomy-service_category.html`, `templates/taxonomy-project_category.html`, `templates/taxonomy-department.html`, `templates/search.html`, `templates/404.html`)** (Completed in Phase 6)
 
 ### Stage 6: Frontend Interactivity, Forms & Micro-Animations
 - [ ] **Step 24: Core JS & Form Engine (`assets/js/theme.js`, `inc/form-handlers.js`)**

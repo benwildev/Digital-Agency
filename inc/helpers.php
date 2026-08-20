@@ -115,19 +115,27 @@ function digital_agency_decode_json_array( $raw_data ): array {
 /**
  * Retrieve structured attachment data objects for a gallery field
  *
- * @param int    $post_id Post ID.
- * @param string $meta_key Meta key containing attachment IDs.
- * @param string $size Image size.
+ * @param int|array<int> $post_id_or_ids Post ID or array of attachment IDs.
+ * @param string         $meta_key Meta key containing attachment IDs if post ID is passed.
+ * @param string         $size Image size.
  * @return array<int, array<string, mixed>>
  */
-function digital_agency_get_gallery_images( int $post_id, string $meta_key, string $size = 'large' ): array {
-    $raw_ids = get_post_meta( $post_id, $meta_key, true );
-    $ids = digital_agency_decode_json_array( $raw_ids );
+function digital_agency_get_gallery_images( $post_id_or_ids, string $meta_key = '', string $size = 'large' ): array {
+    if ( is_array( $post_id_or_ids ) ) {
+        $ids = $post_id_or_ids;
+    } elseif ( is_numeric( $post_id_or_ids ) && ! empty( $meta_key ) ) {
+        $raw_ids = get_post_meta( (int) $post_id_or_ids, $meta_key, true );
+        $ids     = digital_agency_decode_json_array( $raw_ids );
+    } else {
+        $ids = array();
+    }
 
     $images = array();
     foreach ( $ids as $id ) {
         $attachment_id = absint( $id );
-        if ( ! $attachment_id ) continue;
+        if ( ! $attachment_id ) {
+            continue;
+        }
 
         $src = wp_get_attachment_image_src( $attachment_id, $size );
         if ( $src ) {
@@ -136,7 +144,7 @@ function digital_agency_get_gallery_images( int $post_id, string $meta_key, stri
                 'url'    => $src[0],
                 'width'  => $src[1],
                 'height' => $src[2],
-                'alt'    => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ?: get_the_title( $post_id ),
+                'alt'    => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ?: '',
             );
         }
     }

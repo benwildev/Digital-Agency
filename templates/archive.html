@@ -1,33 +1,50 @@
+<!-- wp:template-part {"slug":"topbar","area":"header"} /-->
 <!-- wp:template-part {"slug":"header","area":"header"} /-->
 
-<main class="wp-block-group agency-main-content" id="main-content" style="padding-top:var(--wp--preset--spacing--space-12);padding-bottom:var(--wp--preset--spacing--space-20)">
-  <!-- wp:group {"layout":{"type":"constrained"}} -->
-  <div class="wp-block-group">
-    <!-- wp:query-title {"type":"archive","fontSize":"heading-1"} /-->
-    <!-- wp:term-description {"style":{"color":{"text":"var:preset|color|text-light-secondary"}},"fontSize":"body-large"} /-->
+<main class="wp-block-group agency-main-content has-surface-dark-base-background-color has-background" id="main-content" style="padding-top:var(--wp--preset--spacing--space-16);padding-bottom:var(--wp--preset--spacing--space-20);padding-left:var(--wp--preset--spacing--space-5);padding-right:var(--wp--preset--spacing--space-5)">
+  <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
+  <div class="wp-block-group alignwide">
+    <!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|space-12"}}}} -->
+    <div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--space-12);max-width:800px;">
+      <!-- wp:paragraph {"className":"agency-eyebrow"} -->
+      <p class="agency-eyebrow"><span class="agency-eyebrow__dot"></span> ARTICLE ARCHIVES</p>
+      <!-- /wp:paragraph -->
+      <!-- wp:query-title {"type":"archive","style":{"typography":{"fontFamily":"var:preset|font-family|syne","fontWeight":"800"}},"fontSize":"display-large"} /-->
+      <!-- wp:term-description {"style":{"color":{"text":"var:preset|color|text-light-secondary"}},"fontSize":"body-large"} /-->
+    </div>
+    <!-- /wp:group -->
 
-    <!-- wp:query {"queryId":2,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
+    <!-- wp:query {"queryId":2,"query":{"perPage":9,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
     <div class="wp-block-query">
       <!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
-      <!-- wp:group {"className":"agency-card","style":{"color":{"background":"var:preset|color|surface-dark-card"},"spacing":{"padding":{"top":"var:preset|spacing|space-5","bottom":"var:preset|spacing|space-5","left":"var:preset|spacing|space-5","right":"var:preset|spacing|space-5"}},"border":{"radius":"12px","style":"solid","width":"1px","color":"var:preset|color|border-dark-subtle"}}} -->
-      <div class="wp-block-group agency-card has-surface-dark-card-background-color has-background has-border-color" style="border-color:var(--wp--preset--color--border-dark-subtle);border-style:solid;border-width:1px;border-radius:12px;padding-top:var(--wp--preset--spacing--space-5);padding-right:var(--wp--preset--spacing--space-5);padding-bottom:var(--wp--preset--spacing--space-5);padding-left:var(--wp--preset--spacing--space-5)">
-        <!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/9","className":"agency-bw-image"} /-->
-        <!-- wp:post-title {"isLink":true,"fontSize":"heading-4"} /-->
-        <!-- wp:post-excerpt {"moreText":"Read More"} /-->
+      <!-- wp:group {"className":"agency-card","style":{"color":{"background":"var:preset|color|surface-dark-card"},"spacing":{"padding":{"top":"var:preset|spacing|space-6","bottom":"var:preset|spacing|space-6","left":"var:preset|spacing|space-6","right":"var:preset|spacing|space-6"}},"border":{"radius":"20px","style":"solid","width":"1px","color":"var:preset|color|border-dark-strong"}}} -->
+      <div class="wp-block-group agency-card has-surface-dark-card-background-color has-background has-border-color" style="border-color:var(--wp--preset--color--border-dark-strong);border-style:solid;border-width:1px;border-radius:20px;padding:var(--wp--preset--spacing--space-6)">
+        <!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/9","className":"agency-bw-image","style":{"border":{"radius":"12px"}}} /-->
+        <!-- wp:post-terms {"term":"category","style":{"typography":{"textTransform":"uppercase","fontWeight":"700"}},"fontSize":"caption-eyebrow"} /-->
+        <!-- wp:post-title {"isLink":true,"style":{"typography":{"fontFamily":"var:preset|font-family|syne","fontWeight":"700"}},"fontSize":"heading-4"} /-->
+        <!-- wp:post-excerpt {"moreText":"Read Full Analysis ↗"} /-->
         <!-- wp:post-date {"fontSize":"body-small","style":{"color":{"text":"var:preset|color|text-light-muted"}}} /-->
       </div>
       <!-- /wp:group -->
       <!-- /wp:post-template -->
 
-      <!-- wp:query-pagination -->
+      <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|space-12"}}}} -->
       <!-- wp:query-pagination-previous /-->
       <!-- wp:query-pagination-numbers /-->
       <!-- wp:query-pagination-next /-->
       <!-- /wp:query-pagination -->
+
+      <!-- wp:query-no-results -->
+      <!-- wp:paragraph {"style":{"color":{"text":"var:preset|color|text-light-secondary"}}} -->
+      <p class="has-text-light-secondary-color has-text-color">No articles found in this archive.</p>
+      <!-- /wp:paragraph -->
+      <!-- /wp:query-no-results -->
     </div>
     <!-- /wp:query -->
   </div>
   <!-- /wp:group -->
 </main>
 
+<!-- wp:pattern {"slug":"digital-agency/home-cta"} /-->
+<!-- wp:pattern {"slug":"digital-agency/newsletter"} /-->
 <!-- wp:template-part {"slug":"footer","area":"footer"} /-->

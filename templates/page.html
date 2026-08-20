@@ -1,13 +1,17 @@
+<!-- wp:template-part {"slug":"topbar","area":"header"} /-->
 <!-- wp:template-part {"slug":"header","area":"header"} /-->
 
-<main class="wp-block-group agency-main-content" id="main-content" style="padding-top:var(--wp--preset--spacing--space-12);padding-bottom:var(--wp--preset--spacing--space-20)">
-  <!-- wp:group {"layout":{"type":"constrained"}} -->
+<main class="wp-block-group agency-main-content has-surface-dark-base-background-color has-background" id="main-content" style="padding-top:var(--wp--preset--spacing--space-16);padding-bottom:var(--wp--preset--spacing--space-20);padding-left:var(--wp--preset--spacing--space-5);padding-right:var(--wp--preset--spacing--space-5)">
+  <!-- wp:group {"layout":{"type":"constrained","contentSize":"900px"}} -->
   <div class="wp-block-group">
-    <!-- wp:post-title {"level":1,"fontSize":"heading-1"} /-->
-    <!-- wp:post-featured-image {"aspectRatio":"16/9","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|space-8"}}},"className":"agency-bw-image"} /-->
+    <!-- wp:pattern {"slug":"digital-agency/page-header"} /-->
+    <!-- wp:post-title {"level":1,"style":{"typography":{"fontFamily":"var:preset|font-family|syne","fontWeight":"800","letterSpacing":"-0.02em"}},"fontSize":"display-large"} /-->
+    <!-- wp:post-featured-image {"aspectRatio":"16/9","style":{"spacing":{"margin":{"top":"var:preset|spacing|space-8","bottom":"var:preset|spacing|space-10"}},"border":{"radius":"20px"}},"className":"agency-bw-image"} /-->
     <!-- wp:post-content {"layout":{"type":"constrained"}} /-->
   </div>
   <!-- /wp:group -->
 </main>
 
+<!-- wp:pattern {"slug":"digital-agency/home-cta"} /-->
+<!-- wp:pattern {"slug":"digital-agency/newsletter"} /-->
 <!-- wp:template-part {"slug":"footer","area":"footer"} /-->

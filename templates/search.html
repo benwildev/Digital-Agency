@@ -1,32 +1,50 @@
+<!-- wp:template-part {"slug":"topbar","area":"header"} /-->
 <!-- wp:template-part {"slug":"header","area":"header"} /-->
 
-<main class="wp-block-group agency-main-content" id="main-content" style="padding-top:var(--wp--preset--spacing--space-12);padding-bottom:var(--wp--preset--spacing--space-20)">
-  <!-- wp:group {"layout":{"type":"constrained"}} -->
+<main class="wp-block-group agency-main-content has-surface-dark-base-background-color has-background" id="main-content" style="padding-top:var(--wp--preset--spacing--space-16);padding-bottom:var(--wp--preset--spacing--space-20);padding-left:var(--wp--preset--spacing--space-5);padding-right:var(--wp--preset--spacing--space-5)">
+  <!-- wp:group {"layout":{"type":"constrained","contentSize":"900px"}} -->
   <div class="wp-block-group">
-    <!-- wp:query-title {"type":"search","fontSize":"heading-1"} /-->
-    <!-- wp:search {"label":"Search Site","showLabel":false,"placeholder":"Type keywords...","buttonText":"Search","buttonPosition":"button-inside","buttonUseIcon":true,"style":{"border":{"radius":"9999px"}}} /-->
+    <!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|space-10"}}}} -->
+    <div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--space-10);">
+      <!-- wp:paragraph {"className":"agency-eyebrow"} -->
+      <p class="agency-eyebrow"><span class="agency-eyebrow__dot"></span> SEARCH RESULTS</p>
+      <!-- /wp:paragraph -->
+      <!-- wp:query-title {"type":"search","style":{"typography":{"fontFamily":"var:preset|font-family|syne","fontWeight":"800"}},"fontSize":"display-large"} /-->
+      <!-- wp:search {"label":"Search Site","showLabel":false,"placeholder":"Refine search term...","buttonText":"Search ↗","buttonPosition":"button-inside","style":{"border":{"radius":"9999px"}}} /-->
+    </div>
+    <!-- /wp:group -->
 
-    <!-- wp:query {"queryId":3,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
+    <!-- wp:query {"queryId":3,"query":{"perPage":8,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
     <div class="wp-block-query" style="margin-top:var(--wp--preset--spacing--space-8)">
       <!-- wp:post-template {"layout":{"type":"default"}} -->
-      <!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|space-6"}}},"className":"agency-card"} -->
-      <div class="wp-block-group agency-card" style="margin-bottom:var(--wp--preset--spacing--space-6)">
-        <!-- wp:post-title {"isLink":true,"fontSize":"heading-3"} /-->
-        <!-- wp:post-excerpt /-->
+      <!-- wp:group {"className":"agency-card","style":{"color":{"background":"var:preset|color|surface-dark-card"},"spacing":{"padding":{"top":"var:preset|spacing|space-6","bottom":"var:preset|spacing|space-6","left":"var:preset|spacing|space-6","right":"var:preset|spacing|space-6"},"margin":{"bottom":"var:preset|spacing|space-6"}},"border":{"radius":"20px","style":"solid","width":"1px","color":"var:preset|color|border-dark-strong"}}} -->
+      <div class="wp-block-group agency-card has-surface-dark-card-background-color has-background has-border-color" style="border-color:var(--wp--preset--color--border-dark-strong);border-style:solid;border-width:1px;border-radius:20px;padding:var(--wp--preset--spacing--space-6);margin-bottom:var(--wp--preset--spacing--space-6)">
+        <!-- wp:post-title {"isLink":true,"style":{"typography":{"fontFamily":"var:preset|font-family|syne","fontWeight":"700"}},"fontSize":"heading-3"} /-->
+        <!-- wp:post-excerpt {"moreText":"Explore Result ↗"} /-->
         <!-- wp:post-date {"fontSize":"body-small","style":{"color":{"text":"var:preset|color|text-light-muted"}}} /-->
       </div>
       <!-- /wp:group -->
       <!-- /wp:post-template -->
 
-      <!-- wp:query-pagination -->
+      <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
       <!-- wp:query-pagination-previous /-->
       <!-- wp:query-pagination-numbers /-->
       <!-- wp:query-pagination-next /-->
       <!-- /wp:query-pagination -->
+
+      <!-- wp:query-no-results -->
+      <div style="background:var(--wp--preset--color--surface-dark-card);border:1px solid var(--wp--preset--color--border-dark-strong);border-radius:20px;padding:3rem 2rem;text-align:center;">
+        <h3 style="font-family:var(--wp--preset--font-family--syne);color:#FFF;margin-bottom:0.5rem;">No Matches Found</h3>
+        <p style="color:var(--wp--preset--color--text-light-secondary);max-width:460px;margin:0 auto 1.5rem auto;">We couldn't find any resources or articles matching your keyword. Please try a different query or browse our core capabilities.</p>
+        <a href="<?php echo esc_url( home_url( '/services/' ) ); ?>" class="wp-block-button__link wp-element-button" style="border-radius:9999px;background:var(--wp--preset--color--primary-accent);color:var(--wp--preset--color--surface-dark-base);font-weight:700;padding:0.75rem 1.5rem;text-decoration:none;">Explore Capabilities ↗</a>
+      </div>
+      <!-- /wp:query-no-results -->
     </div>
     <!-- /wp:query -->
   </div>
   <!-- /wp:group -->
 </main>
 
+<!-- wp:pattern {"slug":"digital-agency/home-cta"} /-->
+<!-- wp:pattern {"slug":"digital-agency/newsletter"} /-->
 <!-- wp:template-part {"slug":"footer","area":"footer"} /-->
