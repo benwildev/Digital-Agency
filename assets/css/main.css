@@ -1,0 +1,422 @@
+/**
+ * Digital Agency — Global Visual Shell & Component Styles
+ *
+ * @package DigitalAgency
+ * @version 1.2.0
+ */
+
+/* =========================================================================
+ * 1. Global Resets & Accessibility Defaults
+ * ========================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.agency-menu-open {
+  overflow: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--wp--preset--color--primary-accent, #C8F560) !important;
+  outline-offset: 3px !important;
+}
+
+/* =========================================================================
+ * 2. Top Bar Styling
+ * ========================================================================= */
+.agency-topbar {
+  border-bottom: 1px solid var(--wp--preset--color--border-dark-subtle, rgba(255, 255, 255, 0.08));
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.agency-topbar a {
+  color: var(--wp--preset--color--text-light-muted, #94A3B8);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.agency-topbar a:hover {
+  color: var(--wp--preset--color--primary-accent, #C8F560);
+}
+
+.agency-topbar__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.agency-topbar__icon {
+  color: var(--wp--preset--color--primary-accent, #C8F560);
+  display: inline-flex;
+}
+
+/* =========================================================================
+ * 3. Sticky Main Header & Navigation
+ * ========================================================================= */
+.agency-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+  background-color: var(--wp--preset--color--surface-dark-base, #0A130F);
+}
+
+.agency-header.is-scrolled {
+  background-color: rgba(10, 19, 15, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--wp--preset--color--border-dark-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.agency-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+.agency-brand__logo-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--wp--preset--color--primary-accent, #C8F560);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wp--preset--color--surface-dark-base, #0A130F);
+  font-weight: 900;
+  font-size: 1.125rem;
+}
+
+/* Navigation Links */
+.wp-block-navigation .wp-block-navigation-item a {
+  position: relative;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+.wp-block-navigation .wp-block-navigation-item a:hover,
+.wp-block-navigation .wp-block-navigation-item.current-menu-item a {
+  color: var(--wp--preset--color--primary-accent, #C8F560) !important;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open {
+  background-color: rgba(10, 19, 15, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 2rem;
+}
+
+/* =========================================================================
+ * 4. Infinite Service Marquee / Ticker
+ * ========================================================================= */
+.agency-marquee-container {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  width: 100%;
+  position: relative;
+  background-color: var(--wp--preset--color--surface-dark-elevated, #172C23);
+  border-top: 1px solid var(--wp--preset--color--border-dark-subtle, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--wp--preset--color--border-dark-subtle, rgba(255, 255, 255, 0.08));
+  padding: 1rem 0;
+}
+
+.agency-marquee-track {
+  display: flex;
+  flex-shrink: 0;
+  min-width: 100%;
+  align-items: center;
+  justify-content: space-around;
+  gap: 3rem;
+  animation: agencyTicker 30s linear infinite;
+  will-change: transform;
+}
+
+.agency-marquee-container:hover .agency-marquee-track {
+  animation-play-state: paused;
+}
+
+.agency-marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--wp--preset--font-family--syne, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--text-light-primary, #FFFFFF);
+  white-space: nowrap;
+}
+
+.agency-marquee-star {
+  color: var(--wp--preset--color--primary-accent, #C8F560);
+  font-size: 1.25rem;
+}
+
+@keyframes agencyTicker {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* =========================================================================
+ * 5. Interactive Cards & Hover Micro-Interactions
+ * ========================================================================= */
+.agency-card {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, border-color;
+}
+
+.agency-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200, 245, 96, 0.4) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.agency-card:hover .agency-card-arrow {
+  background-color: var(--wp--preset--color--primary-accent, #C8F560) !important;
+  color: var(--wp--preset--color--surface-dark-base, #0A130F) !important;
+  border-color: var(--wp--preset--color--primary-accent, #C8F560) !important;
+}
+
+/* Metric / Rating Badges */
+.agency-metric-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  background-color: var(--wp--preset--color--surface-dark-elevated, #172C23);
+  border: 1px solid var(--wp--preset--color--border-dark-strong, #273B32);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--wp--preset--color--primary-accent, #C8F560);
+  width: fit-content;
+}
+
+/* =========================================================================
+ * 6. Accessible FAQ Accordion
+ * ========================================================================= */
+details.agency-faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+details.agency-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+details.agency-faq-item .agency-faq-icon {
+  transition: transform 0.25s ease;
+  display: inline-block;
+}
+
+details.agency-faq-item[open] .agency-faq-icon {
+  transform: rotate(45deg);
+}
+
+/* =========================================================================
+ * 7. Global Newsletter Section
+ * ========================================================================= */
+.agency-newsletter-card {
+  position: relative;
+  background-color: var(--wp--preset--color--surface-dark-card, #11221B);
+  border: 1px solid var(--wp--preset--color--border-dark-strong, #273B32);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.agency-newsletter-form {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 540px;
+}
+
+@media (max-width: 640px) {
+  .agency-newsletter-form {
+    flex-direction: column;
+  }
+
+  .agency-lead-form-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================================================================
+ * 8. Global 4-Column Footer
+ * ========================================================================= */
+.agency-footer {
+  background-color: var(--wp--preset--color--surface-dark-card, #11221B);
+  border-top: 1px solid var(--wp--preset--color--border-dark-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.agency-footer a {
+  color: var(--wp--preset--color--text-light-secondary, #CBD5E1);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.agency-footer a:hover {
+  color: var(--wp--preset--color--primary-accent, #C8F560);
+}
+
+.agency-social-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.agency-social-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--wp--preset--color--surface-dark-elevated, #172C23);
+  border: 1px solid var(--wp--preset--color--border-dark-strong, #273B32);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.agency-social-btn:hover {
+  background-color: var(--wp--preset--color--primary-accent, #C8F560);
+  border-color: var(--wp--preset--color--primary-accent, #C8F560);
+  color: var(--wp--preset--color--surface-dark-base, #0A130F) !important;
+  transform: translateY(-2px);
+}
+
+/* =========================================================================
+ * 9. Form Controls & Input Styling
+ * ========================================================================= */
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-family: var(--wp--preset--font-family--inter, sans-serif);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--wp--preset--color--text-light-primary, #FFFFFF);
+  background-color: var(--wp--preset--color--surface-dark-card, #11221B);
+  border: 1px solid var(--wp--preset--color--border-dark-strong, #273B32);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--wp--preset--color--text-light-muted, #94A3B8);
+  opacity: 0.7;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  background-color: var(--wp--preset--color--surface-dark-elevated, #172C23);
+  border-color: var(--wp--preset--color--primary-accent, #C8F560);
+  box-shadow: 0 0 0 3px var(--wp--preset--color--accent-subtle, rgba(200, 245, 96, 0.12));
+}
+
+/* =========================================================================
+ * 10. Eyebrow Badges & Status Pills
+ * ========================================================================= */
+.agency-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  font-family: var(--wp--preset--font-family--inter, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--primary-accent, #C8F560);
+  background-color: var(--wp--preset--color--accent-subtle, rgba(200, 245, 96, 0.12));
+  border: 1px solid rgba(200, 245, 96, 0.25);
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.agency-eyebrow__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--wp--preset--color--primary-accent, #C8F560);
+  display: inline-block;
+}
+
+/* =========================================================================
+ * 11. Hardware-Accelerated Black & White Photography Filter
+ * ========================================================================= */
+.agency-bw-image {
+  overflow: hidden;
+  position: relative;
+  border-radius: inherit;
+}
+
+.agency-bw-image img {
+  filter: grayscale(100%) contrast(110%) brightness(95%);
+  transition: filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: filter, transform;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agency-bw-image:hover img,
+.wp-block-post:hover .agency-bw-image img,
+.agency-card:hover .agency-bw-image img {
+  filter: grayscale(0%) contrast(100%) brightness(100%);
+  transform: scale(1.04);
+}
+
+/* =========================================================================
+ * 12. Reduced Motion Accessibility Override
+ * ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .agency-marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+}

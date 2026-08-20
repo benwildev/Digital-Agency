@@ -1,0 +1,36 @@
+/**
+ * Digital Agency — Gutenberg Block Editor Match Styles
+ *
+ * @package DigitalAgency
+ */
+
+/* Editor Canvas Background & Text Base */
+.editor-styles-wrapper {
+  background-color: var(--wp--preset--color--surface-dark-base, #0A130F) !important;
+  color: var(--wp--preset--color--text-light-primary, #FFFFFF) !important;
+  font-family: var(--wp--preset--font-family--inter, sans-serif) !important;
+}
+
+/* Headings in Editor */
+.editor-styles-wrapper h1,
+.editor-styles-wrapper h2,
+.editor-styles-wrapper h3,
+.editor-styles-wrapper h4 {
+  font-family: var(--wp--preset--font-family--syne, sans-serif) !important;
+  color: var(--wp--preset--color--text-light-primary, #FFFFFF) !important;
+}
+
+/* Editor Input & Form Mockups */
+.editor-styles-wrapper input[type="text"],
+.editor-styles-wrapper input[type="email"],
+.editor-styles-wrapper textarea,
+.editor-styles-wrapper select {
+  background-color: var(--wp--preset--color--surface-dark-card, #11221B);
+  color: var(--wp--preset--color--text-light-primary, #FFFFFF);
+  border: 1px solid var(--wp--preset--color--border-dark-strong, #273B32);
+}
+
+/* Editor Image Grayscale preview */
+.editor-styles-wrapper .agency-bw-image img {
+  filter: grayscale(100%) contrast(110%);
+}

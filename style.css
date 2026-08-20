@@ -1,0 +1,94 @@
+/*
+Theme Name: Digital Agency
+Theme URI: https://example.com/digital-agency
+Author: Advanced WordPress Architecture Team
+Author URI: https://example.com
+Description: High-performance, modern Block Theme (FSE) for Digital Marketing Agencies, Creative Studios, and Technology Consultancies. Built natively with Gutenberg, fluid typography, dark mode authority, and WCAG 2.1 AA accessibility.
+Version: 1.0.0
+Requires at least: 6.5
+Requires PHP: 8.1
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: digital-agency
+Tags: block-theme, full-site-editing, agency, portfolio, dark-mode, custom-colors, custom-typography, responsive-layout, translation-ready
+
+--------------------------------------------------------------------------------
+Digital Agency Theme Foundation Stylesheet
+--------------------------------------------------------------------------------
+Note: Global design tokens, layout containers, typography scales, colors, and 
+spacing presets are declared natively in theme.json (Schema v3).
+This file contains theme header metadata and fundamental critical resets.
+*/
+
+/* -------------------------------------------------------------------------
+ * 1. Accessible Skip Link
+ * ------------------------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  top: -9999px;
+  left: 1rem;
+  z-index: 999999;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--wp--preset--color--primary-accent, #C8F560);
+  color: var(--wp--preset--color--surface-dark-base, #0A130F);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skip-link:focus {
+  top: 1rem;
+  outline: 3px solid var(--wp--preset--color--surface-white, #FFFFFF);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+ * 2. Focus Visible Management (WCAG 2.1 AA)
+ * ------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--wp--preset--color--primary-accent, #C8F560);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* -------------------------------------------------------------------------
+ * 3. Base Horizontal Overflow & Smooth Sizing
+ * ------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: clip;
+  min-height: 100vh;
+  margin: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* -------------------------------------------------------------------------
+ * 4. Image & Media Resets
+ * ------------------------------------------------------------------------- */
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
