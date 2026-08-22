@@ -17,7 +17,7 @@ $meta     = digital_agency_get_service_meta( $post_id );
 $cats     = get_the_terms( $post_id, 'service_category' );
 $cat_name = ( ! empty( $cats ) && ! is_wp_error( $cats ) ) ? $cats[0]->name : '';
 $related  = digital_agency_get_related_services( $post_id, 3 );
-$gallery_imgs = digital_agency_get_gallery_images( $meta['gallery'] );
+$gallery_imgs = ! empty( $meta['gallery'] ) ? digital_agency_get_gallery_images( $meta['gallery'] ) : array();
 ?>
 <!-- wp:pattern {"slug":"digital-agency/page-header"} /-->
 

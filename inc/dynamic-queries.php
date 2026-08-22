@@ -169,10 +169,15 @@ function digital_agency_get_open_careers( array $args = array() ): WP_Query {
         'update_post_meta_cache' => true,
         'update_post_term_cache' => true,
         'meta_query'             => array(
+            'relation' => 'OR',
             array(
                 'key'     => '_agency_career_status',
                 'value'   => 'Closed',
                 'compare' => '!=',
+            ),
+            array(
+                'key'     => '_agency_career_status',
+                'compare' => 'NOT EXISTS',
             ),
         ),
     );
@@ -332,11 +337,167 @@ function digital_agency_get_project_meta( ?int $post_id = null ): array {
         'impact_metric'      => (string) get_post_meta( $id, '_agency_project_impact_metric', true ),
         'metric_label'       => (string) get_post_meta( $id, '_agency_project_metric_label', true ),
         'challenge'          => (string) get_post_meta( $id, '_agency_project_challenge', true ),
-        'solution'           => (string) get_post_meta( $id, '_agency_project_solution', true ),
+        'strategy'           => (string) get_post_meta( $id, '_agency_project_strategy', true ),
+        'solution'           => (string) ( get_post_meta( $id, '_agency_project_solution', true ) ?: get_post_meta( $id, '_agency_project_strategy', true ) ),
+        'execution'          => (string) get_post_meta( $id, '_agency_project_execution', true ),
+        'results'            => (string) get_post_meta( $id, '_agency_project_results', true ),
+        'timeline'           => (string) get_post_meta( $id, '_agency_project_timeline', true ),
+        'gallery'            => get_post_meta( $id, '_agency_project_gallery', true ),
         'testimonial_id'     => (int) get_post_meta( $id, '_agency_project_testimonial_id', true ),
         'testimonial_quote'  => (string) get_post_meta( $id, '_agency_project_testimonial_quote', true ),
         'testimonial_author' => (string) get_post_meta( $id, '_agency_project_testimonial_author', true ),
         'featured'           => (bool) get_post_meta( $id, '_agency_project_featured', true ),
+    );
+}
+
+/**
+ * Helper to retrieve structured service metadata
+ *
+ * @param int|null $post_id Post ID.
+ * @return array<string, mixed>
+ */
+function digital_agency_get_service_meta( ?int $post_id = null ): array {
+    $id = $post_id ?: get_the_ID();
+    if ( ! $id ) {
+        return array();
+    }
+
+    $price = get_post_meta( $id, '_agency_service_starting_price', true );
+    if ( empty( $price ) ) {
+        $price = get_post_meta( $id, '_agency_service_price', true );
+    }
+
+    $badge = get_post_meta( $id, '_agency_service_highlight_badge', true );
+    if ( empty( $badge ) ) {
+        $badge = get_post_meta( $id, '_agency_service_badge', true );
+    }
+
+    $included = get_post_meta( $id, '_agency_service_included', true );
+    if ( empty( $included ) ) {
+        $included = get_post_meta( $id, '_agency_service_deliverables', true );
+    }
+
+    return array(
+        'price'        => (string) $price,
+        'badge'        => (string) $badge,
+        'included'     => is_array( $included ) ? $included : digital_agency_decode_json_array( $included ),
+        'deliverables' => is_array( $included ) ? $included : digital_agency_decode_json_array( $included ),
+        'expertise'    => is_array( get_post_meta( $id, '_agency_service_expertise', true ) ) ? get_post_meta( $id, '_agency_service_expertise', true ) : digital_agency_decode_json_array( get_post_meta( $id, '_agency_service_expertise', true ) ),
+        'benefits'     => is_array( get_post_meta( $id, '_agency_service_benefits', true ) ) ? get_post_meta( $id, '_agency_service_benefits', true ) : digital_agency_decode_json_array( get_post_meta( $id, '_agency_service_benefits', true ) ),
+        'video'        => (string) get_post_meta( $id, '_agency_service_video_url', true ) ?: (string) get_post_meta( $id, '_agency_service_video', true ),
+        'timeline'     => (string) get_post_meta( $id, '_agency_service_duration', true ) ?: (string) get_post_meta( $id, '_agency_service_timeline', true ),
+        'gallery'      => get_post_meta( $id, '_agency_service_gallery', true ),
+    );
+}
+
+/**
+ * Helper to retrieve structured team member metadata
+ *
+ * @param int|null $post_id Post ID.
+ * @return array<string, mixed>
+ */
+function digital_agency_get_team_meta( ?int $post_id = null ): array {
+    $id = $post_id ?: get_the_ID();
+    if ( ! $id ) {
+        return array();
+    }
+
+    $skills = get_post_meta( $id, '_agency_team_skills', true );
+    $socials = get_post_meta( $id, '_agency_team_socials', true );
+
+    return array(
+        'position'         => (string) get_post_meta( $id, '_agency_team_position', true ),
+        'role'             => (string) get_post_meta( $id, '_agency_team_position', true ),
+        'email'            => (string) get_post_meta( $id, '_agency_team_email', true ),
+        'phone'            => (string) get_post_meta( $id, '_agency_team_phone', true ),
+        'bio'              => (string) get_post_meta( $id, '_agency_team_bio', true ),
+        'experience_years' => (string) get_post_meta( $id, '_agency_team_experience_years', true ),
+        'skills'           => is_array( $skills ) ? $skills : digital_agency_decode_json_array( $skills ),
+        'socials'          => is_array( $socials ) ? $socials : digital_agency_decode_json_array( $socials ),
+        'linkedin'         => is_array( $socials ) ? ( $socials['linkedin'] ?? '' ) : (string) get_post_meta( $id, '_agency_team_linkedin', true ),
+        'twitter'          => is_array( $socials ) ? ( $socials['twitter'] ?? '' ) : (string) get_post_meta( $id, '_agency_team_twitter', true ),
+        'github'           => is_array( $socials ) ? ( $socials['github'] ?? '' ) : (string) get_post_meta( $id, '_agency_team_github', true ),
+    );
+}
+
+/**
+ * Helper to retrieve structured career metadata
+ *
+ * @param int|null $post_id Post ID.
+ * @return array<string, mixed>
+ */
+function digital_agency_get_career_meta( ?int $post_id = null ): array {
+    $id = $post_id ?: get_the_ID();
+    if ( ! $id ) {
+        return array();
+    }
+
+    $resp = get_post_meta( $id, '_agency_career_responsibilities', true );
+    $reqs = get_post_meta( $id, '_agency_career_requirements', true );
+    $skills = get_post_meta( $id, '_agency_career_skills', true );
+
+    return array(
+        'department'       => (string) get_post_meta( $id, '_agency_career_department', true ),
+        'location'         => (string) get_post_meta( $id, '_agency_career_location', true ),
+        'type'             => (string) get_post_meta( $id, '_agency_career_type', true ),
+        'salary'           => (string) get_post_meta( $id, '_agency_career_salary', true ),
+        'experience'       => (string) get_post_meta( $id, '_agency_career_experience', true ),
+        'responsibilities' => is_array( $resp ) ? $resp : digital_agency_decode_json_array( $resp ),
+        'requirements'     => is_array( $reqs ) ? $reqs : digital_agency_decode_json_array( $reqs ),
+        'skills'           => is_array( $skills ) ? $skills : digital_agency_decode_json_array( $skills ),
+        'application_url'  => (string) get_post_meta( $id, '_agency_career_application_url', true ),
+    );
+}
+
+/**
+ * Helper to retrieve structured testimonial metadata
+ *
+ * @param int|null $post_id Post ID.
+ * @return array<string, mixed>
+ */
+function digital_agency_get_testimonial_meta( ?int $post_id = null ): array {
+    $id = $post_id ?: get_the_ID();
+    if ( ! $id ) {
+        return array();
+    }
+
+    return array(
+        'author'   => (string) get_post_meta( $id, '_agency_testimonial_author', true ),
+        'client'   => (string) get_post_meta( $id, '_agency_testimonial_author', true ),
+        'role'     => (string) get_post_meta( $id, '_agency_testimonial_role', true ),
+        'company'  => (string) get_post_meta( $id, '_agency_testimonial_company', true ),
+        'rating'   => (int) ( get_post_meta( $id, '_agency_testimonial_rating', true ) ?: 5 ),
+        'verified' => (bool) get_post_meta( $id, '_agency_testimonial_verified', true ),
+    );
+}
+
+/**
+ * Helper to retrieve structured pricing plan metadata
+ *
+ * @param int|null $post_id Post ID.
+ * @return array<string, mixed>
+ */
+function digital_agency_get_pricing_meta( ?int $post_id = null ): array {
+    $id = $post_id ?: get_the_ID();
+    if ( ! $id ) {
+        return array();
+    }
+
+    $features = get_post_meta( $id, '_agency_plan_features', true );
+    $period   = get_post_meta( $id, '_agency_plan_period', true ) ?: ( get_post_meta( $id, '_agency_plan_billing_period', true ) ?: 'month' );
+    $period_clean = ltrim( (string) $period, '/ ' );
+
+    return array(
+        'price'          => (string) get_post_meta( $id, '_agency_plan_price', true ),
+        'period'         => (string) $period,
+        'billing_period' => (string) $period_clean,
+        'badge'          => (string) get_post_meta( $id, '_agency_plan_badge', true ),
+        'featured'       => (bool) get_post_meta( $id, '_agency_plan_featured', true ),
+        'features'       => is_array( $features ) ? $features : digital_agency_decode_json_array( $features ),
+        'cta_url'        => (string) ( get_post_meta( $id, '_agency_plan_cta_url', true ) ?: ( get_post_meta( $id, '_agency_plan_button_url', true ) ?: '#contact' ) ),
+        'button_url'     => (string) ( get_post_meta( $id, '_agency_plan_button_url', true ) ?: ( get_post_meta( $id, '_agency_plan_cta_url', true ) ?: '#contact' ) ),
+        'cta_text'       => (string) ( get_post_meta( $id, '_agency_plan_cta_text', true ) ?: ( get_post_meta( $id, '_agency_plan_button_text', true ) ?: __( 'Get Started ↗', 'digital-agency' ) ) ),
+        'button_text'    => (string) ( get_post_meta( $id, '_agency_plan_button_text', true ) ?: ( get_post_meta( $id, '_agency_plan_cta_text', true ) ?: __( 'Get Started ↗', 'digital-agency' ) ) ),
     );
 }
 
@@ -409,3 +570,4 @@ function digital_agency_get_career_skills( int $post_id ): array {
 function digital_agency_get_pricing_plan_features( int $post_id ): array {
     return digital_agency_decode_json_array( get_post_meta( $post_id, '_agency_plan_features', true ) );
 }
+

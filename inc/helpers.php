@@ -108,6 +108,12 @@ function digital_agency_decode_json_array( $raw_data ): array {
     if ( ! is_string( $raw_data ) || empty( $raw_data ) ) {
         return array();
     }
+    if ( is_serialized( $raw_data ) ) {
+        $unserialized = maybe_unserialize( $raw_data );
+        if ( is_array( $unserialized ) ) {
+            return $unserialized;
+        }
+    }
     $decoded = json_decode( $raw_data, true );
     return is_array( $decoded ) ? $decoded : array();
 }

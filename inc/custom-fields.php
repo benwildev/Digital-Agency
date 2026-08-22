@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom Fields & Post Meta Engine (WordPress 6.5+ Block Bindings & REST API Ready)
+ * Custom Fields & Post Meta Engine (Advanced Admin UX, REST API & Block Bindings Ready)
  *
  * @package DigitalAgency
  * @version 1.1.0
@@ -9,6 +9,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// =============================================================================
+// 1. POST META REGISTRATION (SCHEMA & REST EXPOSURE)
+// =============================================================================
 
 /**
  * Register all Post Meta fields natively with schema validation and REST exposure
@@ -19,9 +23,7 @@ function digital_agency_register_post_meta(): void {
         return current_user_can( 'edit_posts' );
     };
 
-    // -------------------------------------------------------------------------
     // 1. Service Meta Fields
-    // -------------------------------------------------------------------------
     $service_fields = array(
         '_agency_service_icon'            => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => 'arrow-up-right' ),
         '_agency_service_starting_price' => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '' ),
@@ -46,9 +48,7 @@ function digital_agency_register_post_meta(): void {
         ) );
     }
 
-    // -------------------------------------------------------------------------
     // 2. Project / Case Study Meta Fields
-    // -------------------------------------------------------------------------
     $project_fields = array(
         '_agency_project_client'             => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '' ),
         '_agency_project_year'               => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '' ),
@@ -58,11 +58,11 @@ function digital_agency_register_post_meta(): void {
         '_agency_project_impact_metric'      => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '' ),
         '_agency_project_metric_label'       => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '' ),
         '_agency_project_challenge'          => array( 'type' => 'string',  'sanitize' => 'wp_kses_post',            'default' => '' ),
+        '_agency_project_strategy'           => array( 'type' => 'string',  'sanitize' => 'wp_kses_post',            'default' => '' ),
         '_agency_project_solution'           => array( 'type' => 'string',  'sanitize' => 'wp_kses_post',            'default' => '' ),
+        '_agency_project_results'            => array( 'type' => 'string',  'sanitize' => 'wp_kses_post',            'default' => '' ),
         '_agency_project_gallery'            => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '[]' ),
         '_agency_project_testimonial_id'     => array( 'type' => 'integer', 'sanitize' => 'absint',                  'default' => 0 ),
-        '_agency_project_testimonial_quote'  => array( 'type' => 'string',  'sanitize' => 'sanitize_textarea_field', 'default' => '' ),
-        '_agency_project_testimonial_author' => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '' ),
         '_agency_project_featured'           => array( 'type' => 'integer', 'sanitize' => 'absint',                  'default' => 0 ),
     );
 
@@ -77,9 +77,7 @@ function digital_agency_register_post_meta(): void {
         ) );
     }
 
-    // -------------------------------------------------------------------------
     // 3. Team Member Meta Fields
-    // -------------------------------------------------------------------------
     $team_fields = array(
         '_agency_team_position' => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '' ),
         '_agency_team_email'    => array( 'type' => 'string',  'sanitize' => 'sanitize_email',          'default' => '' ),
@@ -102,9 +100,7 @@ function digital_agency_register_post_meta(): void {
         ) );
     }
 
-    // -------------------------------------------------------------------------
     // 4. Career Meta Fields
-    // -------------------------------------------------------------------------
     $career_fields = array(
         '_agency_career_job_type'         => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => 'Full-Time' ),
         '_agency_career_location'         => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => 'Remote' ),
@@ -129,9 +125,7 @@ function digital_agency_register_post_meta(): void {
         ) );
     }
 
-    // -------------------------------------------------------------------------
     // 5. Testimonial Meta Fields
-    // -------------------------------------------------------------------------
     $testimonial_fields = array(
         '_agency_testimonial_author'   => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field', 'default' => '' ),
         '_agency_testimonial_company'  => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field', 'default' => '' ),
@@ -151,9 +145,7 @@ function digital_agency_register_post_meta(): void {
         ) );
     }
 
-    // -------------------------------------------------------------------------
     // 6. Pricing Plan Meta Fields
-    // -------------------------------------------------------------------------
     $pricing_fields = array(
         '_agency_plan_price'          => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '$2,999' ),
         '_agency_plan_billing_period' => array( 'type' => 'string',  'sanitize' => 'sanitize_text_field',     'default' => '/month' ),
@@ -178,7 +170,7 @@ function digital_agency_register_post_meta(): void {
 add_action( 'init', 'digital_agency_register_post_meta' );
 
 // =============================================================================
-// ADMIN META BOXES & EDITORIAL INTERFACES
+// 2. ADMIN METABOXES REGISTRATION
 // =============================================================================
 
 function digital_agency_add_meta_boxes(): void {
@@ -238,531 +230,876 @@ function digital_agency_add_meta_boxes(): void {
 }
 add_action( 'add_meta_boxes', 'digital_agency_add_meta_boxes' );
 
+// =============================================================================
+// 3. METABOX EDITORIAL RENDERING ENGINES
+// =============================================================================
+
 /**
- * Render Service Meta Box
+ * 3.1 Render Service Meta Box
  */
 function digital_agency_render_service_meta_box( WP_Post $post ): void {
     wp_nonce_field( 'digital_agency_save_meta', 'digital_agency_meta_nonce' );
 
-    $price        = get_post_meta( $post->ID, '_agency_service_starting_price', true );
-    $timeline     = get_post_meta( $post->ID, '_agency_service_timeline', true );
-    $badge        = get_post_meta( $post->ID, '_agency_service_highlight_badge', true );
-    $video_url    = get_post_meta( $post->ID, '_agency_service_video_url', true );
-    $gallery_raw  = get_post_meta( $post->ID, '_agency_service_gallery', true );
-    $gallery_ids  = implode( ', ', array_map( 'absint', (array) json_decode( (string) $gallery_raw, true ) ?: array() ) );
-    $featured     = (int) get_post_meta( $post->ID, '_agency_service_featured', true );
+    $meta = digital_agency_get_service_meta( $post->ID );
+    $price        = $meta['price'] ?? '';
+    $timeline     = $meta['timeline'] ?? '';
+    $badge        = $meta['badge'] ?? '';
+    $video_url    = $meta['video_url'] ?? '';
+    $gallery      = $meta['gallery'] ?? array();
+    $featured     = ! empty( $meta['featured'] );
+    $deliverables = $meta['deliverables'] ?? array();
+    $expertise    = $meta['expertise'] ?? array();
+    $benefits     = $meta['benefits'] ?? array();
 
-    $included_raw = (string) get_post_meta( $post->ID, '_agency_service_included', true );
-    $included_txt = implode( "\n", array_map( function( $item ) {
-        return is_array( $item ) ? ( $item['title'] ?? '' ) : (string) $item;
-    }, (array) json_decode( $included_raw, true ) ?: array() ) );
-
-    $expertise_raw = (string) get_post_meta( $post->ID, '_agency_service_expertise', true );
-    $expertise_txt = implode( "\n", array_map( function( $item ) {
-        return is_array( $item ) ? ( $item['title'] ?? '' ) : (string) $item;
-    }, (array) json_decode( $expertise_raw, true ) ?: array() ) );
-
-    $benefits_raw = (string) get_post_meta( $post->ID, '_agency_service_benefits', true );
-    $benefits_txt = implode( "\n", array_map( function( $item ) {
-        return is_array( $item ) ? ( $item['title'] ?? '' ) : (string) $item;
-    }, (array) json_decode( $benefits_raw, true ) ?: array() ) );
-
+    $gallery_ids_json = wp_json_encode( array_map( 'absint', (array) $gallery ) );
     ?>
-    <table class="form-table" role="presentation">
-        <tr>
-            <th scope="row"><label for="_agency_service_starting_price"><?php esc_html_e( 'Starting Price / Retainer', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_service_starting_price" name="_agency_service_starting_price" value="<?php echo esc_attr( $price ); ?>" class="regular-text" placeholder="e.g. $2,500/mo" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_service_timeline"><?php esc_html_e( 'Estimated Timeline', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_service_timeline" name="_agency_service_timeline" value="<?php echo esc_attr( $timeline ); ?>" class="regular-text" placeholder="e.g. 2-4 Weeks" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_service_highlight_badge"><?php esc_html_e( 'Card Highlight Badge', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_service_highlight_badge" name="_agency_service_highlight_badge" value="<?php echo esc_attr( $badge ); ?>" class="regular-text" placeholder="e.g. MOST POPULAR" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_service_video_url"><?php esc_html_e( 'Service Video URL (YouTube / Vimeo / MP4)', 'digital-agency' ); ?></label></th>
-            <td><input type="url" id="_agency_service_video_url" name="_agency_service_video_url" value="<?php echo esc_url( $video_url ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_service_gallery_ids"><?php esc_html_e( 'Gallery Image Attachment IDs', 'digital-agency' ); ?></label></th>
-            <td>
-                <input type="text" id="_agency_service_gallery_ids" name="_agency_service_gallery_ids" value="<?php echo esc_attr( $gallery_ids ); ?>" class="regular-text" placeholder="e.g. 102, 105, 108" />
-                <p class="description"><?php esc_html_e( 'Comma-separated WordPress Media Library attachment IDs', 'digital-agency' ); ?></p>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_service_included_text"><?php esc_html_e( 'Services Included (One per line)', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_service_included_text" name="_agency_service_included_text" rows="4" class="large-text"><?php echo esc_textarea( $included_txt ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_service_expertise_text"><?php esc_html_e( 'Key Expertise Points (One per line)', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_service_expertise_text" name="_agency_service_expertise_text" rows="4" class="large-text"><?php echo esc_textarea( $expertise_txt ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_service_benefits_text"><?php esc_html_e( 'Client Benefits (One per line)', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_service_benefits_text" name="_agency_service_benefits_text" rows="4" class="large-text"><?php echo esc_textarea( $benefits_txt ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><?php esc_html_e( 'Featured Service', 'digital-agency' ); ?></th>
-            <td>
-                <label for="_agency_service_featured">
-                    <input type="checkbox" id="_agency_service_featured" name="_agency_service_featured" value="1" <?php checked( $featured, 1 ); ?> />
-                    <?php esc_html_e( 'Feature on homepage and highlighted service grids', 'digital-agency' ); ?>
+    <div class="agency-admin-metabox">
+
+        <!-- Section 1: Service Details -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-admin-generic"></span>
+                    <?php esc_html_e( 'Service Parameters & Commercials', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-grid-2">
+                <div class="agency-admin-field">
+                    <label for="_agency_service_starting_price"><?php esc_html_e( 'Starting Investment / Retainer', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_service_starting_price" name="_agency_service_starting_price" value="<?php echo esc_attr( $price ); ?>" placeholder="e.g. $4,500" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_service_timeline"><?php esc_html_e( 'Estimated Execution Timeline', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_service_timeline" name="_agency_service_timeline" value="<?php echo esc_attr( $timeline ); ?>" placeholder="e.g. 4-6 Weeks" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_service_highlight_badge"><?php esc_html_e( 'Card Highlight Badge', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_service_highlight_badge" name="_agency_service_highlight_badge" value="<?php echo esc_attr( $badge ); ?>" placeholder="e.g. CORE SERVICE" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_service_video_url"><?php esc_html_e( 'Service Explainer Video URL (YouTube / Vimeo / MP4)', 'digital-agency' ); ?></label>
+                    <input type="url" id="_agency_service_video_url" name="_agency_service_video_url" value="<?php echo esc_url( $video_url ); ?>" placeholder="https://..." />
+                </div>
+            </div>
+            <div style="margin-top:16px;">
+                <label style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="_agency_service_featured" value="1" <?php checked( $featured, true ); ?> />
+                    <?php esc_html_e( 'Highlight as Featured Capability on Homepage', 'digital-agency' ); ?>
                 </label>
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+
+        <!-- Section 2: Media Gallery -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-format-gallery"></span>
+                    <?php esc_html_e( 'Service Visual Gallery', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-gallery-wrapper">
+                <input type="hidden" name="_agency_service_gallery_json" value="<?php echo esc_attr( $gallery_ids_json ); ?>" data-gallery-input />
+                <div class="agency-gallery-thumbs" data-gallery-thumbs>
+                    <?php if ( ! empty( $gallery ) ) : ?>
+                        <?php foreach ( $gallery as $att_id ) : ?>
+                            <?php
+                            $att_id = absint( $att_id );
+                            $thumb_src = wp_get_attachment_image_src( $att_id, 'thumbnail' );
+                            if ( $thumb_src ) :
+                            ?>
+                                <div class="agency-gallery-thumb-item" data-attachment-id="<?php echo esc_attr( $att_id ); ?>">
+                                    <img src="<?php echo esc_url( $thumb_src[0] ); ?>" alt="" />
+                                    <button type="button" class="agency-gallery-thumb-remove" data-gallery-remove aria-label="<?php esc_attr_e( 'Remove image', 'digital-agency' ); ?>">&times;</button>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <p class="agency-gallery-empty-msg"><?php esc_html_e( 'No images in service gallery. Click below to add from Media Library.', 'digital-agency' ); ?></p>
+                    <?php endif; ?>
+                </div>
+                <div>
+                    <button type="button" class="button button-secondary" data-gallery-select data-frame-title="<?php esc_attr_e( 'Select Service Gallery Images', 'digital-agency' ); ?>" data-frame-button="<?php esc_attr_e( 'Add Images to Gallery', 'digital-agency' ); ?>">
+                        <span class="dashicons dashicons-images-alt2" style="vertical-align:text-bottom;margin-right:4px;"></span>
+                        <?php esc_html_e( 'Manage Gallery Images', 'digital-agency' ); ?>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Deliverables Repeatable List -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-saved"></span>
+                    <?php esc_html_e( 'Deliverables & Included Scope', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $deliverables ) ) : ?>
+                        <?php foreach ( $deliverables as $item ) : ?>
+                            <li class="agency-repeatable-row">
+                                <input type="text" name="_agency_service_included_items[]" value="<?php echo esc_attr( $item ); ?>" class="agency-repeatable-input" placeholder="<?php esc_attr_e( 'e.g. Comprehensive technical audit', 'digital-agency' ); ?>" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove item', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-field-name="_agency_service_included_items" data-placeholder="<?php esc_attr_e( 'e.g. Technical SEO & Schema markup architecture', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Deliverable', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 4: Key Expertise Repeatable List -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-awards"></span>
+                    <?php esc_html_e( 'Strategic Expertise Points', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $expertise ) ) : ?>
+                        <?php foreach ( $expertise as $item ) : ?>
+                            <li class="agency-repeatable-row">
+                                <input type="text" name="_agency_service_expertise_items[]" value="<?php echo esc_attr( $item ); ?>" class="agency-repeatable-input" placeholder="<?php esc_attr_e( 'e.g. Core Web Vitals optimization', 'digital-agency' ); ?>" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove item', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-field-name="_agency_service_expertise_items" data-placeholder="<?php esc_attr_e( 'e.g. High-throughput MySQL scaling', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Expertise Point', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 5: Client Benefits Repeatable List -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-chart-line"></span>
+                    <?php esc_html_e( 'Client Return on Investment & Benefits', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $benefits ) ) : ?>
+                        <?php foreach ( $benefits as $item ) : ?>
+                            <li class="agency-repeatable-row">
+                                <input type="text" name="_agency_service_benefits_items[]" value="<?php echo esc_attr( $item ); ?>" class="agency-repeatable-input" placeholder="<?php esc_attr_e( 'e.g. 40%+ reduction in server response latency', 'digital-agency' ); ?>" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove item', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-field-name="_agency_service_benefits_items" data-placeholder="<?php esc_attr_e( 'e.g. Higher search ranking velocity', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Client Benefit', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+    </div>
     <?php
 }
 
 /**
- * Render Project Meta Box
+ * 3.2 Render Project / Case Study Meta Box
  */
 function digital_agency_render_project_meta_box( WP_Post $post ): void {
     wp_nonce_field( 'digital_agency_save_meta', 'digital_agency_meta_nonce' );
 
-    $client       = get_post_meta( $post->ID, '_agency_project_client', true );
-    $year         = get_post_meta( $post->ID, '_agency_project_year', true );
-    $country      = get_post_meta( $post->ID, '_agency_project_country', true );
-    $url          = get_post_meta( $post->ID, '_agency_project_url', true );
-    $video_url    = get_post_meta( $post->ID, '_agency_project_video_url', true );
-    $impact       = get_post_meta( $post->ID, '_agency_project_impact_metric', true );
-    $metric_label = get_post_meta( $post->ID, '_agency_project_metric_label', true );
-    $challenge    = get_post_meta( $post->ID, '_agency_project_challenge', true );
-    $solution     = get_post_meta( $post->ID, '_agency_project_solution', true );
-    $testi_id     = (int) get_post_meta( $post->ID, '_agency_project_testimonial_id', true );
-    $featured     = (int) get_post_meta( $post->ID, '_agency_project_featured', true );
+    $meta = digital_agency_get_project_meta( $post->ID );
+    $client       = $meta['client'] ?? '';
+    $year         = $meta['year'] ?? '';
+    $country      = $meta['country'] ?? '';
+    $url          = $meta['url'] ?? '';
+    $video_url    = $meta['video_url'] ?? '';
+    $impact       = $meta['impact'] ?? '';
+    $metric_label = $meta['metric_label'] ?? '';
+    $challenge    = $meta['challenge'] ?? '';
+    $strategy     = $meta['strategy'] ?? '';
+    $solution     = $meta['solution'] ?? '';
+    $results      = $meta['results'] ?? '';
+    $gallery      = $meta['gallery'] ?? array();
+    $testi_id     = $meta['testimonial_id'] ?? 0;
+    $featured     = ! empty( $meta['featured'] );
 
-    $gallery_raw  = get_post_meta( $post->ID, '_agency_project_gallery', true );
-    $gallery_ids  = implode( ', ', array_map( 'absint', (array) json_decode( (string) $gallery_raw, true ) ?: array() ) );
+    $gallery_ids_json = wp_json_encode( array_map( 'absint', (array) $gallery ) );
 
-    // Query available testimonials for dropdown
-    $testimonials = get_posts( array( 'post_type' => 'testimonial', 'numberposts' => -1, 'post_status' => 'publish' ) );
-
+    // Fetch published testimonials for relationship selector
+    $testimonials = get_posts( array(
+        'post_type'      => 'testimonial',
+        'post_status'    => 'publish',
+        'posts_per_page' => 50,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ) );
     ?>
-    <table class="form-table" role="presentation">
-        <tr>
-            <th scope="row"><label for="_agency_project_client"><?php esc_html_e( 'Client / Brand Name', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_project_client" name="_agency_project_client" value="<?php echo esc_attr( $client ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_impact_metric"><?php esc_html_e( 'Key Impact Metric Badge', 'digital-agency' ); ?></label></th>
-            <td>
-                <input type="text" id="_agency_project_impact_metric" name="_agency_project_impact_metric" value="<?php echo esc_attr( $impact ); ?>" class="regular-text" placeholder="e.g. +320% ROI or 4.8x ROAS" />
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_metric_label"><?php esc_html_e( 'Impact Metric Label', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_project_metric_label" name="_agency_project_metric_label" value="<?php echo esc_attr( $metric_label ); ?>" class="regular-text" placeholder="e.g. Organic Traffic Growth" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_year"><?php esc_html_e( 'Project Year', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_project_year" name="_agency_project_year" value="<?php echo esc_attr( $year ); ?>" class="small-text" placeholder="2026" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_country"><?php esc_html_e( 'Client Location / Country', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_project_country" name="_agency_project_country" value="<?php echo esc_attr( $country ); ?>" class="regular-text" placeholder="e.g. New York, USA" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_url"><?php esc_html_e( 'Live Project URL', 'digital-agency' ); ?></label></th>
-            <td><input type="url" id="_agency_project_url" name="_agency_project_url" value="<?php echo esc_url( $url ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_video_url"><?php esc_html_e( 'Case Study Video URL', 'digital-agency' ); ?></label></th>
-            <td><input type="url" id="_agency_project_video_url" name="_agency_project_video_url" value="<?php echo esc_url( $video_url ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_gallery_ids"><?php esc_html_e( 'Project Gallery Attachment IDs', 'digital-agency' ); ?></label></th>
-            <td>
-                <input type="text" id="_agency_project_gallery_ids" name="_agency_project_gallery_ids" value="<?php echo esc_attr( $gallery_ids ); ?>" class="regular-text" placeholder="e.g. 201, 204, 209" />
-                <p class="description"><?php esc_html_e( 'Comma-separated media attachment IDs', 'digital-agency' ); ?></p>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_testimonial_id"><?php esc_html_e( 'Linked Client Testimonial', 'digital-agency' ); ?></label></th>
-            <td>
+    <div class="agency-admin-metabox">
+
+        <!-- Section 1: Project Parameters -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-portfolio"></span>
+                    <?php esc_html_e( 'Case Study Parameters & Impact Metrics', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-grid-3">
+                <div class="agency-admin-field">
+                    <label for="_agency_project_client"><?php esc_html_e( 'Client / Brand Name', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_project_client" name="_agency_project_client" value="<?php echo esc_attr( $client ); ?>" placeholder="e.g. Finscale Global" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_project_year"><?php esc_html_e( 'Project Year / Timeline', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_project_year" name="_agency_project_year" value="<?php echo esc_attr( $year ); ?>" placeholder="e.g. 2026" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_project_country"><?php esc_html_e( 'Region / Market', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_project_country" name="_agency_project_country" value="<?php echo esc_attr( $country ); ?>" placeholder="e.g. North America / Global" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_project_impact_metric"><?php esc_html_e( 'Impact Metric Highlight', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_project_impact_metric" name="_agency_project_impact_metric" value="<?php echo esc_attr( $impact ); ?>" placeholder="e.g. +340% ROAS" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_project_metric_label"><?php esc_html_e( 'Metric Attribution Label', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_project_metric_label" name="_agency_project_metric_label" value="<?php echo esc_attr( $metric_label ); ?>" placeholder="e.g. Net Pipeline Acceleration" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_project_url"><?php esc_html_e( 'Live Website / Product URL', 'digital-agency' ); ?></label>
+                    <input type="url" id="_agency_project_url" name="_agency_project_url" value="<?php echo esc_url( $url ); ?>" placeholder="https://..." />
+                </div>
+            </div>
+            <div class="agency-admin-field" style="margin-top:16px;">
+                <label for="_agency_project_video_url"><?php esc_html_e( 'Showcase Reel / Video URL (YouTube / Vimeo / MP4)', 'digital-agency' ); ?></label>
+                <input type="url" id="_agency_project_video_url" name="_agency_project_video_url" value="<?php echo esc_url( $video_url ); ?>" placeholder="https://..." />
+            </div>
+            <div style="margin-top:16px;">
+                <label style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="_agency_project_featured" value="1" <?php checked( $featured, true ); ?> />
+                    <?php esc_html_e( 'Feature on Homepage Project Showcase', 'digital-agency' ); ?>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 2: Narrative Breakdown -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-editor-quote"></span>
+                    <?php esc_html_e( 'Case Study Narrative (01 Challenge • 02 Strategy • 03 Impact)', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-field" style="margin-bottom:16px;">
+                <label for="_agency_project_challenge"><strong><?php esc_html_e( '01. The Challenge (Market Bottleneck)', 'digital-agency' ); ?></strong></label>
+                <textarea id="_agency_project_challenge" name="_agency_project_challenge" rows="3"><?php echo esc_textarea( $challenge ); ?></textarea>
+            </div>
+            <div class="agency-admin-field" style="margin-bottom:16px;">
+                <label for="_agency_project_strategy"><strong><?php esc_html_e( '02. The Strategy (Execution Architecture)', 'digital-agency' ); ?></strong></label>
+                <textarea id="_agency_project_strategy" name="_agency_project_strategy" rows="3"><?php echo esc_textarea( $strategy ); ?></textarea>
+            </div>
+            <div class="agency-admin-field" style="margin-bottom:16px;">
+                <label for="_agency_project_solution"><strong><?php esc_html_e( '03. The Solution / Engineering Implementation', 'digital-agency' ); ?></strong></label>
+                <textarea id="_agency_project_solution" name="_agency_project_solution" rows="3"><?php echo esc_textarea( $solution ); ?></textarea>
+            </div>
+            <div class="agency-admin-field">
+                <label for="_agency_project_results"><strong><?php esc_html_e( '04. Quantifiable Results & ROI Breakdown', 'digital-agency' ); ?></strong></label>
+                <textarea id="_agency_project_results" name="_agency_project_results" rows="3"><?php echo esc_textarea( $results ); ?></textarea>
+            </div>
+        </div>
+
+        <!-- Section 3: Media Gallery -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-format-gallery"></span>
+                    <?php esc_html_e( 'Case Study Visual Mockups & Gallery', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-gallery-wrapper">
+                <input type="hidden" name="_agency_project_gallery_json" value="<?php echo esc_attr( $gallery_ids_json ); ?>" data-gallery-input />
+                <div class="agency-gallery-thumbs" data-gallery-thumbs>
+                    <?php if ( ! empty( $gallery ) ) : ?>
+                        <?php foreach ( $gallery as $att_id ) : ?>
+                            <?php
+                            $att_id = absint( $att_id );
+                            $thumb_src = wp_get_attachment_image_src( $att_id, 'thumbnail' );
+                            if ( $thumb_src ) :
+                            ?>
+                                <div class="agency-gallery-thumb-item" data-attachment-id="<?php echo esc_attr( $att_id ); ?>">
+                                    <img src="<?php echo esc_url( $thumb_src[0] ); ?>" alt="" />
+                                    <button type="button" class="agency-gallery-thumb-remove" data-gallery-remove aria-label="<?php esc_attr_e( 'Remove image', 'digital-agency' ); ?>">&times;</button>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <p class="agency-gallery-empty-msg"><?php esc_html_e( 'No gallery images selected. Manage visual assets with the button below.', 'digital-agency' ); ?></p>
+                    <?php endif; ?>
+                </div>
+                <div>
+                    <button type="button" class="button button-secondary" data-gallery-select data-frame-title="<?php esc_attr_e( 'Select Project Case Study Images', 'digital-agency' ); ?>" data-frame-button="<?php esc_attr_e( 'Add Images to Project', 'digital-agency' ); ?>">
+                        <span class="dashicons dashicons-images-alt2" style="vertical-align:text-bottom;margin-right:4px;"></span>
+                        <?php esc_html_e( 'Manage Project Gallery', 'digital-agency' ); ?>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Linked Client Testimonial Relationship -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-testimonial"></span>
+                    <?php esc_html_e( 'Linked Client Endorsement (Relational Model)', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-field">
+                <label for="_agency_project_testimonial_id"><?php esc_html_e( 'Select Client Testimonial', 'digital-agency' ); ?></label>
                 <select id="_agency_project_testimonial_id" name="_agency_project_testimonial_id">
-                    <option value="0"><?php esc_html_e( '— None / No linked testimonial —', 'digital-agency' ); ?></option>
-                    <?php foreach ( $testimonials as $testi ) : ?>
-                        <option value="<?php echo esc_attr( $testi->ID ); ?>" <?php selected( $testi_id, $testi->ID ); ?>><?php echo esc_html( $testi->post_title ); ?></option>
+                    <option value="0"><?php esc_html_e( '— No Linked Testimonial —', 'digital-agency' ); ?></option>
+                    <?php foreach ( $testimonials as $t_post ) : ?>
+                        <?php
+                        $t_author  = get_post_meta( $t_post->ID, '_agency_testimonial_author', true ) ?: $t_post->post_title;
+                        $t_company = get_post_meta( $t_post->ID, '_agency_testimonial_company', true );
+                        $t_label   = $t_author . ( $t_company ? ' (' . $t_company . ')' : '' );
+                        ?>
+                        <option value="<?php echo esc_attr( $t_post->ID ); ?>" <?php selected( $testi_id, $t_post->ID ); ?>>
+                            <?php echo esc_html( $t_label ); ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_challenge"><?php esc_html_e( 'The Challenge Narrative', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_project_challenge" name="_agency_project_challenge" rows="4" class="large-text"><?php echo esc_textarea( $challenge ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_project_solution"><?php esc_html_e( 'The Solution & Strategy', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_project_solution" name="_agency_project_solution" rows="4" class="large-text"><?php echo esc_textarea( $solution ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><?php esc_html_e( 'Featured Case Study', 'digital-agency' ); ?></th>
-            <td>
-                <label for="_agency_project_featured">
-                    <input type="checkbox" id="_agency_project_featured" name="_agency_project_featured" value="1" <?php checked( $featured, 1 ); ?> />
-                    <?php esc_html_e( 'Highlight on homepage case study showcase', 'digital-agency' ); ?>
-                </label>
-            </td>
-        </tr>
-    </table>
+                <p class="description"><?php esc_html_e( 'Automatically embeds the verified client testimonial, star rating, and executive avatar directly on this single project case study page.', 'digital-agency' ); ?></p>
+            </div>
+        </div>
+
+    </div>
     <?php
 }
 
 /**
- * Render Team Member Meta Box with Structured Skill Meters
+ * 3.3 Render Team Member Meta Box
  */
 function digital_agency_render_team_meta_box( WP_Post $post ): void {
     wp_nonce_field( 'digital_agency_save_meta', 'digital_agency_meta_nonce' );
 
-    $position = get_post_meta( $post->ID, '_agency_team_position', true );
-    $email    = get_post_meta( $post->ID, '_agency_team_email', true );
-    $phone    = get_post_meta( $post->ID, '_agency_team_phone', true );
-    $linkedin = get_post_meta( $post->ID, '_agency_team_linkedin', true );
-    $twitter  = get_post_meta( $post->ID, '_agency_team_twitter', true );
-    $github   = get_post_meta( $post->ID, '_agency_team_github', true );
-    $featured = (int) get_post_meta( $post->ID, '_agency_team_featured', true );
-
-    $skills_raw = (string) get_post_meta( $post->ID, '_agency_team_skills', true );
-    $skills     = (array) json_decode( $skills_raw, true ) ?: array();
-    $skills_txt = '';
-    foreach ( $skills as $s ) {
-        if ( ! empty( $s['name'] ) ) {
-            $skills_txt .= $s['name'] . ' : ' . (int) ( $s['percentage'] ?? 90 ) . "\n";
-        }
-    }
-
+    $meta = digital_agency_get_team_meta( $post->ID );
+    $position = $meta['position'] ?? '';
+    $email    = $meta['email'] ?? '';
+    $phone    = $meta['phone'] ?? '';
+    $linkedin = $meta['linkedin'] ?? '';
+    $twitter  = $meta['twitter'] ?? '';
+    $github   = $meta['github'] ?? '';
+    $skills   = $meta['skills'] ?? array();
+    $featured = ! empty( $meta['featured'] );
     ?>
-    <table class="form-table" role="presentation">
-        <tr>
-            <th scope="row"><label for="_agency_team_position"><?php esc_html_e( 'Designation / Job Title', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_team_position" name="_agency_team_position" value="<?php echo esc_attr( $position ); ?>" class="regular-text" placeholder="e.g. Principal Brand Strategist" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_team_skills_text"><?php esc_html_e( 'Skill Competencies & Percentages (One per line: "Skill Name : 90")', 'digital-agency' ); ?></label></th>
-            <td>
-                <textarea id="_agency_team_skills_text" name="_agency_team_skills_text" rows="5" class="large-text" placeholder="Communication : 95&#10;Networking : 85&#10;Brand Architecture : 90"><?php echo esc_textarea( trim( $skills_txt ) ); ?></textarea>
-                <p class="description"><?php esc_html_e( 'Format: Skill Name : Percentage (0 to 100). Used to render visual skill progress bars.', 'digital-agency' ); ?></p>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_team_email"><?php esc_html_e( 'Direct Email', 'digital-agency' ); ?></label></th>
-            <td><input type="email" id="_agency_team_email" name="_agency_team_email" value="<?php echo esc_attr( $email ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_team_phone"><?php esc_html_e( 'Direct Phone', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_team_phone" name="_agency_team_phone" value="<?php echo esc_attr( $phone ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_team_linkedin"><?php esc_html_e( 'LinkedIn Profile URL', 'digital-agency' ); ?></label></th>
-            <td><input type="url" id="_agency_team_linkedin" name="_agency_team_linkedin" value="<?php echo esc_url( $linkedin ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_team_twitter"><?php esc_html_e( 'X / Twitter Profile URL', 'digital-agency' ); ?></label></th>
-            <td><input type="url" id="_agency_team_twitter" name="_agency_team_twitter" value="<?php echo esc_url( $twitter ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_team_github"><?php esc_html_e( 'GitHub Profile URL', 'digital-agency' ); ?></label></th>
-            <td><input type="url" id="_agency_team_github" name="_agency_team_github" value="<?php echo esc_url( $github ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><?php esc_html_e( 'Leadership / Featured Member', 'digital-agency' ); ?></th>
-            <td>
-                <label for="_agency_team_featured">
-                    <input type="checkbox" id="_agency_team_featured" name="_agency_team_featured" value="1" <?php checked( $featured, 1 ); ?> />
-                    <?php esc_html_e( 'Display in homepage leadership preview', 'digital-agency' ); ?>
+    <div class="agency-admin-metabox">
+
+        <!-- Section 1: Designation & Contact -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-businessman"></span>
+                    <?php esc_html_e( 'Role Designation & Communication', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-grid-3">
+                <div class="agency-admin-field">
+                    <label for="_agency_team_position"><?php esc_html_e( 'Position / Title', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_team_position" name="_agency_team_position" value="<?php echo esc_attr( $position ); ?>" placeholder="e.g. Principal Technical Architect" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_team_email"><?php esc_html_e( 'Direct Work Email', 'digital-agency' ); ?></label>
+                    <input type="email" id="_agency_team_email" name="_agency_team_email" value="<?php echo esc_attr( $email ); ?>" placeholder="alex@agency.com" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_team_phone"><?php esc_html_e( 'Direct Phone Number', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_team_phone" name="_agency_team_phone" value="<?php echo esc_attr( $phone ); ?>" placeholder="+1 (555) 019-2834" />
+                </div>
+            </div>
+            <div style="margin-top:16px;">
+                <label style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="_agency_team_featured" value="1" <?php checked( $featured, true ); ?> />
+                    <?php esc_html_e( 'Highlight in Executive Leadership Grid on Homepage & About Page', 'digital-agency' ); ?>
                 </label>
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+
+        <!-- Section 2: Social Profiles -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-share"></span>
+                    <?php esc_html_e( 'Executive Profiles & Professional Socials', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-grid-3">
+                <div class="agency-admin-field">
+                    <label for="_agency_team_linkedin"><?php esc_html_e( 'LinkedIn URL', 'digital-agency' ); ?></label>
+                    <input type="url" id="_agency_team_linkedin" name="_agency_team_linkedin" value="<?php echo esc_url( $linkedin ); ?>" placeholder="https://linkedin.com/in/..." />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_team_twitter"><?php esc_html_e( 'X / Twitter URL', 'digital-agency' ); ?></label>
+                    <input type="url" id="_agency_team_twitter" name="_agency_team_twitter" value="<?php echo esc_url( $twitter ); ?>" placeholder="https://x.com/..." />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_team_github"><?php esc_html_e( 'GitHub Profile URL', 'digital-agency' ); ?></label>
+                    <input type="url" id="_agency_team_github" name="_agency_team_github" value="<?php echo esc_url( $github ); ?>" placeholder="https://github.com/..." />
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Skill Competencies -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-performance"></span>
+                    <?php esc_html_e( 'Skill Competency Ratings (0% to 100%)', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $skills ) ) : ?>
+                        <?php foreach ( $skills as $sk ) : ?>
+                            <?php
+                            $sk_name = is_array( $sk ) ? ( $sk['name'] ?? '' ) : (string) $sk;
+                            $sk_pct  = is_array( $sk ) ? min( 100, max( 0, (int) ( $sk['percentage'] ?? 90 ) ) ) : 90;
+                            ?>
+                            <li class="agency-skill-row">
+                                <input type="text" name="_agency_team_skill_name[]" value="<?php echo esc_attr( $sk_name ); ?>" placeholder="<?php esc_attr_e( 'Skill Name (e.g. Enterprise Architecture)', 'digital-agency' ); ?>" class="agency-skill-name" />
+                                <input type="range" value="<?php echo esc_attr( $sk_pct ); ?>" min="0" max="100" class="agency-skill-range" />
+                                <input type="number" name="_agency_team_skill_pct[]" value="<?php echo esc_attr( $sk_pct ); ?>" min="0" max="100" class="agency-skill-number" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove skill', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-skill-repeatable data-field-name="_agency_team_skill" data-placeholder="<?php esc_attr_e( 'e.g. Cloud Infrastructure Scaling', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Skill Competency', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+    </div>
     <?php
 }
 
 /**
- * Render Career Meta Box with Repeatable Responsibilities & Requirements
- */
-function digital_agency_render_career_meta_box( WP_Post $post ): void {
-    wp_nonce_field( 'digital_agency_save_meta', 'digital_agency_meta_nonce' );
-
-    $job_type     = get_post_meta( $post->ID, '_agency_career_job_type', true ) ?: 'Full-Time';
-    $location     = get_post_meta( $post->ID, '_agency_career_location', true ) ?: 'Remote';
-    $salary       = get_post_meta( $post->ID, '_agency_career_salary_range', true );
-    $experience   = get_post_meta( $post->ID, '_agency_career_experience', true );
-    $apply_email  = get_post_meta( $post->ID, '_agency_career_apply_email', true );
-    $status       = get_post_meta( $post->ID, '_agency_career_status', true ) ?: 'Open';
-    $featured     = (int) get_post_meta( $post->ID, '_agency_career_featured', true );
-
-    $resp_raw     = (string) get_post_meta( $post->ID, '_agency_career_responsibilities', true );
-    $resp_txt     = implode( "\n", (array) json_decode( $resp_raw, true ) ?: array() );
-
-    $req_raw      = (string) get_post_meta( $post->ID, '_agency_career_requirements', true );
-    $req_txt      = implode( "\n", (array) json_decode( $req_raw, true ) ?: array() );
-
-    $skills_raw   = (string) get_post_meta( $post->ID, '_agency_career_skills', true );
-    $skills_txt   = implode( "\n", (array) json_decode( $skills_raw, true ) ?: array() );
-
-    ?>
-    <table class="form-table" role="presentation">
-        <tr>
-            <th scope="row"><label for="_agency_career_job_type"><?php esc_html_e( 'Employment Type', 'digital-agency' ); ?></label></th>
-            <td>
-                <select id="_agency_career_job_type" name="_agency_career_job_type">
-                    <option value="Full-Time" <?php selected( $job_type, 'Full-Time' ); ?>><?php esc_html_e( 'Full-Time', 'digital-agency' ); ?></option>
-                    <option value="Part-Time" <?php selected( $job_type, 'Part-Time' ); ?>><?php esc_html_e( 'Part-Time', 'digital-agency' ); ?></option>
-                    <option value="Contract" <?php selected( $job_type, 'Contract' ); ?>><?php esc_html_e( 'Contract', 'digital-agency' ); ?></option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_location"><?php esc_html_e( 'Location', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_career_location" name="_agency_career_location" value="<?php echo esc_attr( $location ); ?>" class="regular-text" placeholder="e.g. Remote / NYC" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_salary_range"><?php esc_html_e( 'Salary / Compensation', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_career_salary_range" name="_agency_career_salary_range" value="<?php echo esc_attr( $salary ); ?>" class="regular-text" placeholder="e.g. $110,000 - $140,000" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_experience"><?php esc_html_e( 'Experience Required', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_career_experience" name="_agency_career_experience" value="<?php echo esc_attr( $experience ); ?>" class="regular-text" placeholder="e.g. 4+ Years" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_apply_email"><?php esc_html_e( 'Application Recipient Email', 'digital-agency' ); ?></label></th>
-            <td><input type="email" id="_agency_career_apply_email" name="_agency_career_apply_email" value="<?php echo esc_attr( $apply_email ); ?>" class="regular-text" placeholder="careers@agency.com" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_status"><?php esc_html_e( 'Listing Status', 'digital-agency' ); ?></label></th>
-            <td>
-                <select id="_agency_career_status" name="_agency_career_status">
-                    <option value="Open" <?php selected( $status, 'Open' ); ?>><?php esc_html_e( 'Open', 'digital-agency' ); ?></option>
-                    <option value="Urgent" <?php selected( $status, 'Urgent' ); ?>><?php esc_html_e( 'Urgent Hiring', 'digital-agency' ); ?></option>
-                    <option value="Closed" <?php selected( $status, 'Closed' ); ?>><?php esc_html_e( 'Closed / Filled', 'digital-agency' ); ?></option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_responsibilities_text"><?php esc_html_e( 'Key Responsibilities (One per line)', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_career_responsibilities_text" name="_agency_career_responsibilities_text" rows="4" class="large-text"><?php echo esc_textarea( $resp_txt ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_requirements_text"><?php esc_html_e( 'Role Requirements (One per line)', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_career_requirements_text" name="_agency_career_requirements_text" rows="4" class="large-text"><?php echo esc_textarea( $req_txt ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_career_skills_text"><?php esc_html_e( 'Desired Skills & Tech Stack (One per line)', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_career_skills_text" name="_agency_career_skills_text" rows="4" class="large-text"><?php echo esc_textarea( $skills_txt ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><?php esc_html_e( 'Featured Role', 'digital-agency' ); ?></th>
-            <td>
-                <label for="_agency_career_featured">
-                    <input type="checkbox" id="_agency_career_featured" name="_agency_career_featured" value="1" <?php checked( $featured, 1 ); ?> />
-                    <?php esc_html_e( 'Highlight on homepage or careers header banner', 'digital-agency' ); ?>
-                </label>
-            </td>
-        </tr>
-    </table>
-    <?php
-}
-
-/**
- * Render Testimonial Meta Box
+ * 3.4 Render Testimonial Meta Box
  */
 function digital_agency_render_testimonial_meta_box( WP_Post $post ): void {
     wp_nonce_field( 'digital_agency_save_meta', 'digital_agency_meta_nonce' );
 
-    $author   = get_post_meta( $post->ID, '_agency_testimonial_author', true );
-    $company  = get_post_meta( $post->ID, '_agency_testimonial_company', true );
-    $role     = get_post_meta( $post->ID, '_agency_testimonial_role', true );
-    $rating   = (int) get_post_meta( $post->ID, '_agency_testimonial_rating', true ) ?: 5;
-    $featured = (int) get_post_meta( $post->ID, '_agency_testimonial_featured', true );
-
+    $meta     = digital_agency_get_testimonial_meta( $post->ID );
+    $author   = $meta['author'] ?? '';
+    $company  = $meta['company'] ?? '';
+    $role     = $meta['role'] ?? '';
+    $rating   = min( 5, max( 1, (int) ( $meta['rating'] ?? 5 ) ) );
+    $featured = ! empty( $meta['featured'] );
     ?>
-    <table class="form-table" role="presentation">
-        <tr>
-            <th scope="row"><label for="_agency_testimonial_author"><?php esc_html_e( 'Client / Author Name', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_testimonial_author" name="_agency_testimonial_author" value="<?php echo esc_attr( $author ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_testimonial_company"><?php esc_html_e( 'Client Company / Brand', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_testimonial_company" name="_agency_testimonial_company" value="<?php echo esc_attr( $company ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_testimonial_role"><?php esc_html_e( 'Client Role / Title', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_testimonial_role" name="_agency_testimonial_role" value="<?php echo esc_attr( $role ); ?>" class="regular-text" placeholder="e.g. Chief Marketing Officer" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_testimonial_rating"><?php esc_html_e( 'Rating Score (1 to 5 Stars)', 'digital-agency' ); ?></label></th>
-            <td>
-                <select id="_agency_testimonial_rating" name="_agency_testimonial_rating">
-                    <option value="5" <?php selected( $rating, 5 ); ?>>5 Stars (★★★★★)</option>
-                    <option value="4" <?php selected( $rating, 4 ); ?>>4 Stars (★★★★☆)</option>
-                    <option value="3" <?php selected( $rating, 3 ); ?>>3 Stars (★★★☆☆)</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row"><?php esc_html_e( 'Featured Testimonial', 'digital-agency' ); ?></th>
-            <td>
-                <label for="_agency_testimonial_featured">
-                    <input type="checkbox" id="_agency_testimonial_featured" name="_agency_testimonial_featured" value="1" <?php checked( $featured, 1 ); ?> />
-                    <?php esc_html_e( 'Feature on homepage client review slider', 'digital-agency' ); ?>
+    <div class="agency-admin-metabox">
+
+        <!-- Section 1: Client & Review Details -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-format-quote"></span>
+                    <?php esc_html_e( 'Executive Endorsement & Star Rating', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-grid-3">
+                <div class="agency-admin-field">
+                    <label for="_agency_testimonial_author"><?php esc_html_e( 'Client / Executive Name', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_testimonial_author" name="_agency_testimonial_author" value="<?php echo esc_attr( $author ); ?>" placeholder="e.g. Sarah Jenkins" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_testimonial_company"><?php esc_html_e( 'Company / Brand Name', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_testimonial_company" name="_agency_testimonial_company" value="<?php echo esc_attr( $company ); ?>" placeholder="e.g. Finscale Global" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_testimonial_role"><?php esc_html_e( 'Executive Designation / Title', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_testimonial_role" name="_agency_testimonial_role" value="<?php echo esc_attr( $role ); ?>" placeholder="e.g. Chief Marketing Officer" />
+                </div>
+            </div>
+
+            <!-- Rating Selector -->
+            <div class="agency-admin-field" style="margin-top:20px;">
+                <label><strong><?php esc_html_e( 'Verified Rating Score', 'digital-agency' ); ?></strong></label>
+                <div class="agency-rating-selector">
+                    <?php for ( $r = 5; $r >= 1; $r-- ) : ?>
+                        <label class="agency-rating-option">
+                            <input type="radio" name="_agency_testimonial_rating" value="<?php echo esc_attr( $r ); ?>" <?php checked( $rating, $r ); ?> />
+                            <span class="agency-rating-stars"><?php echo esc_html( str_repeat( '★', $r ) . str_repeat( '☆', 5 - $r ) ); ?></span>
+                            <span>(<?php echo esc_html( $r ); ?>/5)</span>
+                        </label>
+                    <?php endfor; ?>
+                </div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <label style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="_agency_testimonial_featured" value="1" <?php checked( $featured, true ); ?> />
+                    <?php esc_html_e( 'Feature in Primary Testimonial Slider on Homepage', 'digital-agency' ); ?>
                 </label>
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+
+    </div>
     <?php
 }
 
 /**
- * Render Pricing Plan Meta Box
+ * 3.5 Render Pricing Plan Meta Box
  */
 function digital_agency_render_pricing_meta_box( WP_Post $post ): void {
     wp_nonce_field( 'digital_agency_save_meta', 'digital_agency_meta_nonce' );
 
-    $price       = get_post_meta( $post->ID, '_agency_plan_price', true ) ?: '$2,999';
-    $period      = get_post_meta( $post->ID, '_agency_plan_billing_period', true ) ?: '/month';
-    $badge       = get_post_meta( $post->ID, '_agency_plan_badge', true );
-    $btn_text    = get_post_meta( $post->ID, '_agency_plan_button_text', true ) ?: 'Choose Plan';
-    $btn_url     = get_post_meta( $post->ID, '_agency_plan_button_url', true ) ?: '#contact';
-    $featured    = (int) get_post_meta( $post->ID, '_agency_plan_featured', true );
-
-    $feat_raw    = (string) get_post_meta( $post->ID, '_agency_plan_features', true );
-    $feat_txt    = implode( "\n", (array) json_decode( $feat_raw, true ) ?: array() );
-
+    $meta     = digital_agency_get_pricing_meta( $post->ID );
+    $price    = $meta['price'] ?? '$4,800';
+    $period   = $meta['period'] ?? '/month';
+    $badge    = $meta['badge'] ?? '';
+    $btn_text = $meta['button_text'] ?? 'Choose Plan';
+    $btn_url  = $meta['button_url'] ?? '#contact';
+    $featured = ! empty( $meta['featured'] );
+    $features = $meta['features'] ?? array();
     ?>
-    <table class="form-table" role="presentation">
-        <tr>
-            <th scope="row"><label for="_agency_plan_price"><?php esc_html_e( 'Price Figure', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_plan_price" name="_agency_plan_price" value="<?php echo esc_attr( $price ); ?>" class="regular-text" placeholder="$2,999" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_plan_billing_period"><?php esc_html_e( 'Billing Period', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_plan_billing_period" name="_agency_plan_billing_period" value="<?php echo esc_attr( $period ); ?>" class="regular-text" placeholder="/month or /quarter" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_plan_badge"><?php esc_html_e( 'Plan Ribbon / Badge', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_plan_badge" name="_agency_plan_badge" value="<?php echo esc_attr( $badge ); ?>" class="regular-text" placeholder="e.g. MOST POPULAR" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_plan_features_text"><?php esc_html_e( 'Included Features (One per line)', 'digital-agency' ); ?></label></th>
-            <td><textarea id="_agency_plan_features_text" name="_agency_plan_features_text" rows="6" class="large-text"><?php echo esc_textarea( $feat_txt ); ?></textarea></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_plan_button_text"><?php esc_html_e( 'Action Button Text', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_plan_button_text" name="_agency_plan_button_text" value="<?php echo esc_attr( $btn_text ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><label for="_agency_plan_button_url"><?php esc_html_e( 'Action Button URL', 'digital-agency' ); ?></label></th>
-            <td><input type="text" id="_agency_plan_button_url" name="_agency_plan_button_url" value="<?php echo esc_attr( $btn_url ); ?>" class="regular-text" /></td>
-        </tr>
-        <tr>
-            <th scope="row"><?php esc_html_e( 'Featured / Highlighted Plan', 'digital-agency' ); ?></th>
-            <td>
-                <label for="_agency_plan_featured">
-                    <input type="checkbox" id="_agency_plan_featured" name="_agency_plan_featured" value="1" <?php checked( $featured, 1 ); ?> />
-                    <?php esc_html_e( 'Highlight with Lime Glow Border on pricing tables', 'digital-agency' ); ?>
+    <div class="agency-admin-metabox">
+
+        <!-- Section 1: Pricing Parameters -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-money-alt"></span>
+                    <?php esc_html_e( 'Retainer Parameters & Call to Action', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-grid-3">
+                <div class="agency-admin-field">
+                    <label for="_agency_plan_price"><?php esc_html_e( 'Price Figure', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_plan_price" name="_agency_plan_price" value="<?php echo esc_attr( $price ); ?>" placeholder="$4,800" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_plan_billing_period"><?php esc_html_e( 'Billing Cadence / Period', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_plan_billing_period" name="_agency_plan_billing_period" value="<?php echo esc_attr( $period ); ?>" placeholder="/month" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_plan_badge"><?php esc_html_e( 'Plan Ribbon / Badge', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_plan_badge" name="_agency_plan_badge" value="<?php echo esc_attr( $badge ); ?>" placeholder="e.g. MOST POPULAR" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_plan_button_text"><?php esc_html_e( 'CTA Button Text', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_plan_button_text" name="_agency_plan_button_text" value="<?php echo esc_attr( $btn_text ); ?>" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_plan_button_url"><?php esc_html_e( 'CTA Button URL / Target', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_plan_button_url" name="_agency_plan_button_url" value="<?php echo esc_attr( $btn_url ); ?>" />
+                </div>
+            </div>
+            <div style="margin-top:16px;">
+                <label style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="_agency_plan_featured" value="1" <?php checked( $featured, true ); ?> />
+                    <?php esc_html_e( 'Highlight with Primary Lime Accent Glow on Pricing Matrix', 'digital-agency' ); ?>
                 </label>
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+
+        <!-- Section 2: Repeatable Plan Features -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-yes-alt"></span>
+                    <?php esc_html_e( 'Included Plan Features & Deliverables', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $features ) ) : ?>
+                        <?php foreach ( $features as $feat ) : ?>
+                            <li class="agency-repeatable-row">
+                                <input type="text" name="_agency_plan_features_items[]" value="<?php echo esc_attr( $feat ); ?>" class="agency-repeatable-input" placeholder="<?php esc_attr_e( 'e.g. Dedicated Technical Director', 'digital-agency' ); ?>" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove feature', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-field-name="_agency_plan_features_items" data-placeholder="<?php esc_attr_e( 'e.g. Continuous performance audits & 24/7 SLA', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Feature Item', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+    </div>
     <?php
 }
 
 /**
- * Save Post Meta securely with nonces and permissions verification
- *
- * @param int $post_id Current post ID being saved.
+ * 3.6 Render Career / Job Opening Meta Box
  */
+function digital_agency_render_career_meta_box( WP_Post $post ): void {
+    wp_nonce_field( 'digital_agency_save_meta', 'digital_agency_meta_nonce' );
+
+    $meta     = digital_agency_get_career_meta( $post->ID );
+    $job_type = $meta['type'] ?? 'Full-Time';
+    $location = $meta['location'] ?? 'Remote / Global';
+    $salary   = $meta['salary'] ?? '$120k – $150k';
+    $experience = get_post_meta( $post->ID, '_agency_career_experience', true ) ?: '5+ Years';
+    $apply_email = get_post_meta( $post->ID, '_agency_career_apply_email', true ) ?: 'careers@digitalagency.com';
+    $status   = get_post_meta( $post->ID, '_agency_career_status', true ) ?: 'Open';
+    $featured = ! empty( $meta['featured'] );
+    $resp     = $meta['responsibilities'] ?? array();
+    $req      = $meta['requirements'] ?? array();
+    $skills   = $meta['skills'] ?? array();
+    ?>
+    <div class="agency-admin-metabox">
+
+        <!-- Section 1: Job Parameters -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-id"></span>
+                    <?php esc_html_e( 'Position Parameters & Compensation', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-admin-grid-3">
+                <div class="agency-admin-field">
+                    <label for="_agency_career_job_type"><?php esc_html_e( 'Employment Arrangement', 'digital-agency' ); ?></label>
+                    <select id="_agency_career_job_type" name="_agency_career_job_type">
+                        <option value="Full-Time" <?php selected( $job_type, 'Full-Time' ); ?>><?php esc_html_e( 'Full-Time', 'digital-agency' ); ?></option>
+                        <option value="Part-Time" <?php selected( $job_type, 'Part-Time' ); ?>><?php esc_html_e( 'Part-Time', 'digital-agency' ); ?></option>
+                        <option value="Contract" <?php selected( $job_type, 'Contract' ); ?>><?php esc_html_e( 'Contract / Retainer', 'digital-agency' ); ?></option>
+                    </select>
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_career_location"><?php esc_html_e( 'Location / Office Hub', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_career_location" name="_agency_career_location" value="<?php echo esc_attr( $location ); ?>" placeholder="e.g. Remote / NYC" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_career_salary_range"><?php esc_html_e( 'Compensation Package', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_career_salary_range" name="_agency_career_salary_range" value="<?php echo esc_attr( $salary ); ?>" placeholder="e.g. $120k – $150k" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_career_experience"><?php esc_html_e( 'Experience Level', 'digital-agency' ); ?></label>
+                    <input type="text" id="_agency_career_experience" name="_agency_career_experience" value="<?php echo esc_attr( $experience ); ?>" placeholder="e.g. 5+ Years" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_career_apply_email"><?php esc_html_e( 'Application Recipient Email', 'digital-agency' ); ?></label>
+                    <input type="email" id="_agency_career_apply_email" name="_agency_career_apply_email" value="<?php echo esc_attr( $apply_email ); ?>" placeholder="careers@agency.com" />
+                </div>
+                <div class="agency-admin-field">
+                    <label for="_agency_career_status"><?php esc_html_e( 'Hiring Status', 'digital-agency' ); ?></label>
+                    <select id="_agency_career_status" name="_agency_career_status">
+                        <option value="Open" <?php selected( $status, 'Open' ); ?>><?php esc_html_e( 'Open / Accepting Applications', 'digital-agency' ); ?></option>
+                        <option value="Urgent" <?php selected( $status, 'Urgent' ); ?>><?php esc_html_e( 'Urgent Priority Hiring', 'digital-agency' ); ?></option>
+                        <option value="Closed" <?php selected( $status, 'Closed' ); ?>><?php esc_html_e( 'Closed / Filled', 'digital-agency' ); ?></option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:16px;">
+                <label style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="_agency_career_featured" value="1" <?php checked( $featured, true ); ?> />
+                    <?php esc_html_e( 'Feature as Key Opportunity on Homepage & Careers Banner', 'digital-agency' ); ?>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 2: Core Responsibilities -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-list-view"></span>
+                    <?php esc_html_e( 'Core Responsibilities', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $resp ) ) : ?>
+                        <?php foreach ( $resp as $item ) : ?>
+                            <li class="agency-repeatable-row">
+                                <input type="text" name="_agency_career_responsibilities_items[]" value="<?php echo esc_attr( $item ); ?>" class="agency-repeatable-input" placeholder="<?php esc_attr_e( 'e.g. Architect scalable Full Site Editing themes', 'digital-agency' ); ?>" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove item', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-field-name="_agency_career_responsibilities_items" data-placeholder="<?php esc_attr_e( 'e.g. Lead code architecture and technical reviews', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Responsibility', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 3: Qualifications & Requirements -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-welcome-learn-more"></span>
+                    <?php esc_html_e( 'Qualifications & Experience Requirements', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $req ) ) : ?>
+                        <?php foreach ( $req as $item ) : ?>
+                            <li class="agency-repeatable-row">
+                                <input type="text" name="_agency_career_requirements_items[]" value="<?php echo esc_attr( $item ); ?>" class="agency-repeatable-input" placeholder="<?php esc_attr_e( 'e.g. 5+ years experience in WordPress engineering', 'digital-agency' ); ?>" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove item', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-field-name="_agency_career_requirements_items" data-placeholder="<?php esc_attr_e( 'e.g. Deep knowledge of Gutenberg block APIs', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Qualification', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 4: Desired Skills -->
+        <div class="agency-admin-section">
+            <div class="agency-admin-section-header">
+                <h4 class="agency-admin-section-title">
+                    <span class="dashicons dashicons-category"></span>
+                    <?php esc_html_e( 'Desired Skills & Tech Stack', 'digital-agency' ); ?>
+                </h4>
+            </div>
+            <div class="agency-repeatable-wrapper">
+                <ul class="agency-repeatable-list">
+                    <?php if ( ! empty( $skills ) ) : ?>
+                        <?php foreach ( $skills as $item ) : ?>
+                            <li class="agency-repeatable-row">
+                                <input type="text" name="_agency_career_skills_items[]" value="<?php echo esc_attr( $item ); ?>" class="agency-repeatable-input" placeholder="<?php esc_attr_e( 'e.g. Modern PHP 8, Semantic HTML, CSS Custom Properties', 'digital-agency' ); ?>" />
+                                <button type="button" class="agency-repeatable-remove" data-repeatable-remove aria-label="<?php esc_attr_e( 'Remove item', 'digital-agency' ); ?>">&times;</button>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+                <button type="button" class="agency-repeatable-add" data-repeatable-add data-field-name="_agency_career_skills_items" data-placeholder="<?php esc_attr_e( 'e.g. React / Gutenberg Block Development', 'digital-agency' ); ?>">
+                    <span class="dashicons dashicons-plus"></span>
+                    <?php esc_html_e( 'Add Skill / Technology', 'digital-agency' ); ?>
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <?php
+}
+
+// =============================================================================
+// 4. SECURE POST META SAVE HANDLER
+// =============================================================================
+
 function digital_agency_save_post_meta( int $post_id ): void {
+    // 1. Verify Nonce
     if ( ! isset( $_POST['digital_agency_meta_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['digital_agency_meta_nonce'] ) ), 'digital_agency_save_meta' ) ) {
         return;
     }
 
+    // 2. Prevent Autosave overwrite
     if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
         return;
     }
 
+    // 3. Prevent Revision overwrite
+    if ( wp_is_post_revision( $post_id ) ) {
+        return;
+    }
+
+    // 4. Check User Permissions
     if ( ! current_user_can( 'edit_post', $post_id ) ) {
         return;
     }
 
     $post_type = get_post_type( $post_id );
 
-    // Service Save
+    // -------------------------------------------------------------------------
+    // 4.1 Save Service Meta
+    // -------------------------------------------------------------------------
     if ( 'service' === $post_type ) {
-        $fields = array(
-            '_agency_service_starting_price' => 'sanitize_text_field',
-            '_agency_service_timeline'       => 'sanitize_text_field',
-            '_agency_service_highlight_badge'=> 'sanitize_text_field',
-            '_agency_service_video_url'      => 'esc_url_raw',
+        $scalar_fields = array(
+            '_agency_service_starting_price'  => 'sanitize_text_field',
+            '_agency_service_timeline'        => 'sanitize_text_field',
+            '_agency_service_highlight_badge' => 'sanitize_text_field',
+            '_agency_service_video_url'       => 'esc_url_raw',
         );
-        foreach ( $fields as $key => $sanitizer ) {
+        foreach ( $scalar_fields as $key => $sanitizer ) {
             if ( isset( $_POST[ $key ] ) ) {
                 update_post_meta( $post_id, $key, call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) ) );
             }
         }
         update_post_meta( $post_id, '_agency_service_featured', isset( $_POST['_agency_service_featured'] ) ? 1 : 0 );
 
-        // Parse Gallery IDs
-        if ( isset( $_POST['_agency_service_gallery_ids'] ) ) {
-            $ids = array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['_agency_service_gallery_ids'] ) ) ) ) );
+        // Gallery JSON
+        if ( isset( $_POST['_agency_service_gallery_json'] ) ) {
+            $raw = json_decode( sanitize_text_field( wp_unslash( $_POST['_agency_service_gallery_json'] ) ), true );
+            $ids = array_filter( array_map( 'absint', (array) ( $raw ?: array() ) ) );
             update_post_meta( $post_id, '_agency_service_gallery', wp_json_encode( array_values( $ids ) ) );
         }
 
-        // Parse Line-by-Line Arrays
-        if ( isset( $_POST['_agency_service_included_text'] ) ) {
-            $lines = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['_agency_service_included_text'] ) ) ) );
-            $included = array_map( function( $l ) { return array( 'title' => trim( $l ) ); }, $lines );
-            update_post_meta( $post_id, '_agency_service_included', wp_json_encode( array_values( $included ) ) );
+        // Repeatable Deliverables
+        if ( isset( $_POST['_agency_service_included_items'] ) && is_array( $_POST['_agency_service_included_items'] ) ) {
+            $items = array_values( array_filter( array_map( 'sanitize_text_field', wp_unslash( $_POST['_agency_service_included_items'] ) ) ) );
+            update_post_meta( $post_id, '_agency_service_included', wp_json_encode( $items ) );
         }
 
-        if ( isset( $_POST['_agency_service_expertise_text'] ) ) {
-            $lines = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['_agency_service_expertise_text'] ) ) ) );
-            $expertise = array_map( function( $l ) { return array( 'title' => trim( $l ) ); }, $lines );
-            update_post_meta( $post_id, '_agency_service_expertise', wp_json_encode( array_values( $expertise ) ) );
+        // Repeatable Expertise
+        if ( isset( $_POST['_agency_service_expertise_items'] ) && is_array( $_POST['_agency_service_expertise_items'] ) ) {
+            $items = array_values( array_filter( array_map( 'sanitize_text_field', wp_unslash( $_POST['_agency_service_expertise_items'] ) ) ) );
+            update_post_meta( $post_id, '_agency_service_expertise', wp_json_encode( $items ) );
         }
 
-        if ( isset( $_POST['_agency_service_benefits_text'] ) ) {
-            $lines = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['_agency_service_benefits_text'] ) ) ) );
-            $benefits = array_map( function( $l ) { return array( 'title' => trim( $l ) ); }, $lines );
-            update_post_meta( $post_id, '_agency_service_benefits', wp_json_encode( array_values( $benefits ) ) );
+        // Repeatable Benefits
+        if ( isset( $_POST['_agency_service_benefits_items'] ) && is_array( $_POST['_agency_service_benefits_items'] ) ) {
+            $items = array_values( array_filter( array_map( 'sanitize_text_field', wp_unslash( $_POST['_agency_service_benefits_items'] ) ) ) );
+            update_post_meta( $post_id, '_agency_service_benefits', wp_json_encode( $items ) );
         }
     }
 
-    // Project Save
+    // -------------------------------------------------------------------------
+    // 4.2 Save Project Meta
+    // -------------------------------------------------------------------------
     if ( 'project' === $post_type ) {
-        $fields = array(
-            '_agency_project_client'        => 'sanitize_text_field',
-            '_agency_project_year'          => 'sanitize_text_field',
-            '_agency_project_country'       => 'sanitize_text_field',
-            '_agency_project_url'           => 'esc_url_raw',
-            '_agency_project_video_url'     => 'esc_url_raw',
-            '_agency_project_impact_metric' => 'sanitize_text_field',
-            '_agency_project_metric_label'  => 'sanitize_text_field',
-            '_agency_project_challenge'     => 'wp_kses_post',
-            '_agency_project_solution'      => 'wp_kses_post',
-            '_agency_project_testimonial_id'=> 'absint',
+        $scalar_fields = array(
+            '_agency_project_client'         => 'sanitize_text_field',
+            '_agency_project_year'           => 'sanitize_text_field',
+            '_agency_project_country'        => 'sanitize_text_field',
+            '_agency_project_url'            => 'esc_url_raw',
+            '_agency_project_video_url'      => 'esc_url_raw',
+            '_agency_project_impact_metric'  => 'sanitize_text_field',
+            '_agency_project_metric_label'   => 'sanitize_text_field',
+            '_agency_project_challenge'      => 'wp_kses_post',
+            '_agency_project_strategy'       => 'wp_kses_post',
+            '_agency_project_solution'       => 'wp_kses_post',
+            '_agency_project_results'        => 'wp_kses_post',
+            '_agency_project_testimonial_id' => 'absint',
         );
-        foreach ( $fields as $key => $sanitizer ) {
+        foreach ( $scalar_fields as $key => $sanitizer ) {
             if ( isset( $_POST[ $key ] ) ) {
                 update_post_meta( $post_id, $key, call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) ) );
             }
         }
         update_post_meta( $post_id, '_agency_project_featured', isset( $_POST['_agency_project_featured'] ) ? 1 : 0 );
 
-        // Parse Gallery IDs
-        if ( isset( $_POST['_agency_project_gallery_ids'] ) ) {
-            $ids = array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['_agency_project_gallery_ids'] ) ) ) ) );
+        // Gallery JSON
+        if ( isset( $_POST['_agency_project_gallery_json'] ) ) {
+            $raw = json_decode( sanitize_text_field( wp_unslash( $_POST['_agency_project_gallery_json'] ) ), true );
+            $ids = array_filter( array_map( 'absint', (array) ( $raw ?: array() ) ) );
             update_post_meta( $post_id, '_agency_project_gallery', wp_json_encode( array_values( $ids ) ) );
         }
     }
 
-    // Team Save
+    // -------------------------------------------------------------------------
+    // 4.3 Save Team Member Meta
+    // -------------------------------------------------------------------------
     if ( 'team_member' === $post_type ) {
-        $fields = array(
+        $scalar_fields = array(
             '_agency_team_position' => 'sanitize_text_field',
             '_agency_team_email'    => 'sanitize_email',
             '_agency_team_phone'    => 'sanitize_text_field',
@@ -770,37 +1107,39 @@ function digital_agency_save_post_meta( int $post_id ): void {
             '_agency_team_twitter'  => 'esc_url_raw',
             '_agency_team_github'   => 'esc_url_raw',
         );
-        foreach ( $fields as $key => $sanitizer ) {
+        foreach ( $scalar_fields as $key => $sanitizer ) {
             if ( isset( $_POST[ $key ] ) ) {
                 update_post_meta( $post_id, $key, call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) ) );
             }
         }
         update_post_meta( $post_id, '_agency_team_featured', isset( $_POST['_agency_team_featured'] ) ? 1 : 0 );
 
-        // Parse Structured Skills & Percentages
-        if ( isset( $_POST['_agency_team_skills_text'] ) ) {
-            $lines = explode( "\n", wp_unslash( $_POST['_agency_team_skills_text'] ) );
+        // Repeatable Skills with Clamped Percentage
+        if ( isset( $_POST['_agency_team_skill_name'] ) && is_array( $_POST['_agency_team_skill_name'] ) ) {
+            $names = wp_unslash( $_POST['_agency_team_skill_name'] );
+            $pcts  = isset( $_POST['_agency_team_skill_pct'] ) ? wp_unslash( $_POST['_agency_team_skill_pct'] ) : array();
             $skills = array();
-            foreach ( $lines as $line ) {
-                $line = trim( $line );
-                if ( empty( $line ) ) continue;
-                $parts = explode( ':', $line );
-                $name = sanitize_text_field( trim( $parts[0] ) );
-                $pct = isset( $parts[1] ) ? min( 100, max( 0, absint( trim( $parts[1] ) ) ) ) : 90;
-                if ( ! empty( $name ) ) {
-                    $skills[] = array(
-                        'name'       => $name,
-                        'percentage' => $pct,
-                    );
+
+            foreach ( $names as $i => $name ) {
+                $name_clean = sanitize_text_field( trim( (string) $name ) );
+                if ( empty( $name_clean ) ) {
+                    continue;
                 }
+                $pct_val = isset( $pcts[ $i ] ) ? min( 100, max( 0, absint( $pcts[ $i ] ) ) ) : 90;
+                $skills[] = array(
+                    'name'       => $name_clean,
+                    'percentage' => $pct_val,
+                );
             }
             update_post_meta( $post_id, '_agency_team_skills', wp_json_encode( $skills ) );
         }
     }
 
-    // Career Save
+    // -------------------------------------------------------------------------
+    // 4.4 Save Career Meta
+    // -------------------------------------------------------------------------
     if ( 'career' === $post_type ) {
-        $fields = array(
+        $scalar_fields = array(
             '_agency_career_job_type'     => 'sanitize_text_field',
             '_agency_career_location'     => 'sanitize_text_field',
             '_agency_career_salary_range' => 'sanitize_text_field',
@@ -808,87 +1147,91 @@ function digital_agency_save_post_meta( int $post_id ): void {
             '_agency_career_apply_email'  => 'sanitize_email',
             '_agency_career_status'       => 'sanitize_text_field',
         );
-        foreach ( $fields as $key => $sanitizer ) {
+        foreach ( $scalar_fields as $key => $sanitizer ) {
             if ( isset( $_POST[ $key ] ) ) {
                 update_post_meta( $post_id, $key, call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) ) );
             }
         }
         update_post_meta( $post_id, '_agency_career_featured', isset( $_POST['_agency_career_featured'] ) ? 1 : 0 );
 
-        // Responsibilities array
-        if ( isset( $_POST['_agency_career_responsibilities_text'] ) ) {
-            $lines = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['_agency_career_responsibilities_text'] ) ) ) );
-            update_post_meta( $post_id, '_agency_career_responsibilities', wp_json_encode( array_values( array_map( 'trim', $lines ) ) ) );
+        // Repeatable Responsibilities
+        if ( isset( $_POST['_agency_career_responsibilities_items'] ) && is_array( $_POST['_agency_career_responsibilities_items'] ) ) {
+            $items = array_values( array_filter( array_map( 'sanitize_text_field', wp_unslash( $_POST['_agency_career_responsibilities_items'] ) ) ) );
+            update_post_meta( $post_id, '_agency_career_responsibilities', wp_json_encode( $items ) );
         }
 
-        // Requirements array
-        if ( isset( $_POST['_agency_career_requirements_text'] ) ) {
-            $lines = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['_agency_career_requirements_text'] ) ) ) );
-            update_post_meta( $post_id, '_agency_career_requirements', wp_json_encode( array_values( array_map( 'trim', $lines ) ) ) );
+        // Repeatable Requirements
+        if ( isset( $_POST['_agency_career_requirements_items'] ) && is_array( $_POST['_agency_career_requirements_items'] ) ) {
+            $items = array_values( array_filter( array_map( 'sanitize_text_field', wp_unslash( $_POST['_agency_career_requirements_items'] ) ) ) );
+            update_post_meta( $post_id, '_agency_career_requirements', wp_json_encode( $items ) );
         }
 
-        // Skills array
-        if ( isset( $_POST['_agency_career_skills_text'] ) ) {
-            $lines = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['_agency_career_skills_text'] ) ) ) );
-            update_post_meta( $post_id, '_agency_career_skills', wp_json_encode( array_values( array_map( 'trim', $lines ) ) ) );
+        // Repeatable Skills
+        if ( isset( $_POST['_agency_career_skills_items'] ) && is_array( $_POST['_agency_career_skills_items'] ) ) {
+            $items = array_values( array_filter( array_map( 'sanitize_text_field', wp_unslash( $_POST['_agency_career_skills_items'] ) ) ) );
+            update_post_meta( $post_id, '_agency_career_skills', wp_json_encode( $items ) );
         }
     }
 
-    // Testimonial Save
+    // -------------------------------------------------------------------------
+    // 4.5 Save Testimonial Meta
+    // -------------------------------------------------------------------------
     if ( 'testimonial' === $post_type ) {
-        $fields = array(
+        $scalar_fields = array(
             '_agency_testimonial_author'  => 'sanitize_text_field',
             '_agency_testimonial_company' => 'sanitize_text_field',
             '_agency_testimonial_role'    => 'sanitize_text_field',
-            '_agency_testimonial_rating'  => 'absint',
         );
-        foreach ( $fields as $key => $sanitizer ) {
+        foreach ( $scalar_fields as $key => $sanitizer ) {
             if ( isset( $_POST[ $key ] ) ) {
-                $val = call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) );
-                if ( '_agency_testimonial_rating' === $key ) {
-                    $val = min( 5, max( 1, (int) $val ) );
-                }
-                update_post_meta( $post_id, $key, $val );
+                update_post_meta( $post_id, $key, call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) ) );
             }
+        }
+        if ( isset( $_POST['_agency_testimonial_rating'] ) ) {
+            $rating_val = min( 5, max( 1, absint( $_POST['_agency_testimonial_rating'] ) ) );
+            update_post_meta( $post_id, '_agency_testimonial_rating', $rating_val );
         }
         update_post_meta( $post_id, '_agency_testimonial_featured', isset( $_POST['_agency_testimonial_featured'] ) ? 1 : 0 );
     }
 
-    // Pricing Plan Save
+    // -------------------------------------------------------------------------
+    // 4.6 Save Pricing Plan Meta
+    // -------------------------------------------------------------------------
     if ( 'pricing_plan' === $post_type ) {
-        $fields = array(
+        $scalar_fields = array(
             '_agency_plan_price'          => 'sanitize_text_field',
             '_agency_plan_billing_period' => 'sanitize_text_field',
             '_agency_plan_badge'          => 'sanitize_text_field',
             '_agency_plan_button_text'    => 'sanitize_text_field',
             '_agency_plan_button_url'     => 'sanitize_text_field',
         );
-        foreach ( $fields as $key => $sanitizer ) {
+        foreach ( $scalar_fields as $key => $sanitizer ) {
             if ( isset( $_POST[ $key ] ) ) {
                 update_post_meta( $post_id, $key, call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) ) );
             }
         }
         update_post_meta( $post_id, '_agency_plan_featured', isset( $_POST['_agency_plan_featured'] ) ? 1 : 0 );
 
-        if ( isset( $_POST['_agency_plan_features_text'] ) ) {
-            $lines = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['_agency_plan_features_text'] ) ) ) );
-            update_post_meta( $post_id, '_agency_plan_features', wp_json_encode( array_values( array_map( 'trim', $lines ) ) ) );
+        // Repeatable Features
+        if ( isset( $_POST['_agency_plan_features_items'] ) && is_array( $_POST['_agency_plan_features_items'] ) ) {
+            $items = array_values( array_filter( array_map( 'sanitize_text_field', wp_unslash( $_POST['_agency_plan_features_items'] ) ) ) );
+            update_post_meta( $post_id, '_agency_plan_features', wp_json_encode( $items ) );
         }
     }
 }
 add_action( 'save_post', 'digital_agency_save_post_meta' );
 
 // =============================================================================
-// ADMIN LIST COLUMNS & SORTABLE FILTERS
+// 5. ADMIN LIST TABLES, CUSTOM COLUMNS & SORTABLE HEADERS
 // =============================================================================
 
-// 1. Service Columns
+// 5.1 Service Columns
 function digital_agency_service_columns( array $columns ): array {
     $new = array();
     foreach ( $columns as $k => $v ) {
         $new[ $k ] = $v;
         if ( 'title' === $k ) {
-            $new['service_price']    = __( 'Starting Price', 'digital-agency' );
+            $new['service_price']    = __( 'Starting Retainer', 'digital-agency' );
             $new['service_timeline'] = __( 'Timeline', 'digital-agency' );
             $new['service_featured'] = __( 'Featured', 'digital-agency' );
         }
@@ -908,13 +1251,14 @@ function digital_agency_service_custom_column( string $column, int $post_id ): v
 }
 add_action( 'manage_service_posts_custom_column', 'digital_agency_service_custom_column', 10, 2 );
 
-// 2. Project Columns
+// 5.2 Project Columns
 function digital_agency_project_columns( array $columns ): array {
     $new = array();
     foreach ( $columns as $k => $v ) {
         $new[ $k ] = $v;
         if ( 'title' === $k ) {
             $new['project_client']   = __( 'Client', 'digital-agency' );
+            $new['project_year']     = __( 'Year', 'digital-agency' );
             $new['project_impact']   = __( 'Impact Metric', 'digital-agency' );
             $new['project_featured'] = __( 'Featured', 'digital-agency' );
         }
@@ -926,6 +1270,8 @@ add_filter( 'manage_project_posts_columns', 'digital_agency_project_columns' );
 function digital_agency_project_custom_column( string $column, int $post_id ): void {
     if ( 'project_client' === $column ) {
         echo esc_html( get_post_meta( $post_id, '_agency_project_client', true ) ?: '—' );
+    } elseif ( 'project_year' === $column ) {
+        echo esc_html( get_post_meta( $post_id, '_agency_project_year', true ) ?: '—' );
     } elseif ( 'project_impact' === $column ) {
         $impact = get_post_meta( $post_id, '_agency_project_impact_metric', true );
         echo $impact ? '<strong style="color:#0284c7;">' . esc_html( $impact ) . '</strong>' : '—';
@@ -935,7 +1281,7 @@ function digital_agency_project_custom_column( string $column, int $post_id ): v
 }
 add_action( 'manage_project_posts_custom_column', 'digital_agency_project_custom_column', 10, 2 );
 
-// 3. Team Columns
+// 5.3 Team Columns
 function digital_agency_team_columns( array $columns ): array {
     $new = array();
     foreach ( $columns as $k => $v ) {
@@ -958,7 +1304,7 @@ function digital_agency_team_custom_column( string $column, int $post_id ): void
 }
 add_action( 'manage_team_member_posts_custom_column', 'digital_agency_team_custom_column', 10, 2 );
 
-// 4. Career Columns
+// 5.4 Career Columns
 function digital_agency_career_columns( array $columns ): array {
     $new = array();
     foreach ( $columns as $k => $v ) {
@@ -967,6 +1313,7 @@ function digital_agency_career_columns( array $columns ): array {
             $new['career_type']     = __( 'Type', 'digital-agency' );
             $new['career_location'] = __( 'Location', 'digital-agency' );
             $new['career_status']   = __( 'Status', 'digital-agency' );
+            $new['career_featured'] = __( 'Featured', 'digital-agency' );
         }
     }
     return $new;
@@ -981,12 +1328,14 @@ function digital_agency_career_custom_column( string $column, int $post_id ): vo
     } elseif ( 'career_status' === $column ) {
         $status = get_post_meta( $post_id, '_agency_career_status', true ) ?: 'Open';
         $color = ( 'Urgent' === $status ) ? '#ef4444' : ( ( 'Closed' === $status ) ? '#6b7280' : '#10b981' );
-        echo '<span style="color:' . esc_attr( $color ) . ';font-weight:600;">' . esc_html( $status ) . '</span>';
+        echo '<span style="color:' . esc_attr( $color ) . ';font-weight:700;">' . esc_html( $status ) . '</span>';
+    } elseif ( 'career_featured' === $column ) {
+        echo get_post_meta( $post_id, '_agency_career_featured', true ) ? '<span style="color:#10b981;font-weight:bold;">✦ Yes</span>' : '—';
     }
 }
 add_action( 'manage_career_posts_custom_column', 'digital_agency_career_custom_column', 10, 2 );
 
-// 5. Testimonial Columns
+// 5.5 Testimonial Columns
 function digital_agency_testimonial_columns( array $columns ): array {
     $new = array();
     foreach ( $columns as $k => $v ) {
@@ -1005,23 +1354,24 @@ function digital_agency_testimonial_custom_column( string $column, int $post_id 
     if ( 'testi_company' === $column ) {
         echo esc_html( get_post_meta( $post_id, '_agency_testimonial_company', true ) ?: '—' );
     } elseif ( 'testi_rating' === $column ) {
-        $rating = (int) get_post_meta( $post_id, '_agency_testimonial_rating', true ) ?: 5;
-        echo esc_html( str_repeat( '★', $rating ) );
+        $rating = min( 5, max( 1, (int) ( get_post_meta( $post_id, '_agency_testimonial_rating', true ) ?: 5 ) ) );
+        echo '<span style="color:#f59e0b;font-size:14px;">' . esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ) . '</span>';
     } elseif ( 'testi_featured' === $column ) {
         echo get_post_meta( $post_id, '_agency_testimonial_featured', true ) ? '<span style="color:#10b981;font-weight:bold;">✦ Yes</span>' : '—';
     }
 }
 add_action( 'manage_testimonial_posts_custom_column', 'digital_agency_testimonial_custom_column', 10, 2 );
 
-// 6. Pricing Plan Columns
+// 5.6 Pricing Plan Columns
 function digital_agency_pricing_plan_columns( array $columns ): array {
     $new = array();
     foreach ( $columns as $k => $v ) {
         $new[ $k ] = $v;
         if ( 'title' === $k ) {
-            $new['plan_price']    = __( 'Price', 'digital-agency' );
+            $new['plan_price']    = __( 'Price / Cadence', 'digital-agency' );
             $new['plan_badge']    = __( 'Badge', 'digital-agency' );
             $new['plan_featured'] = __( 'Featured (Lime Glow)', 'digital-agency' );
+            $new['plan_order']    = __( 'Menu Order', 'digital-agency' );
         }
     }
     return $new;
@@ -1037,17 +1387,105 @@ function digital_agency_pricing_plan_custom_column( string $column, int $post_id
         echo esc_html( get_post_meta( $post_id, '_agency_plan_badge', true ) ?: '—' );
     } elseif ( 'plan_featured' === $column ) {
         echo get_post_meta( $post_id, '_agency_plan_featured', true ) ? '<span style="color:#10b981;font-weight:bold;">✦ Yes</span>' : '—';
+    } elseif ( 'plan_order' === $column ) {
+        $post = get_post( $post_id );
+        echo esc_html( $post->menu_order ?? 0 );
     }
 }
 add_action( 'manage_pricing_plan_posts_custom_column', 'digital_agency_pricing_plan_custom_column', 10, 2 );
 
+// -----------------------------------------------------------------------------
+// 5.7 Sortable Columns Registration & Query Handling
+// -----------------------------------------------------------------------------
+
+function digital_agency_sortable_columns( array $columns ): array {
+    $columns['plan_order']   = 'menu_order';
+    $columns['testi_rating'] = 'testi_rating';
+    $columns['project_year'] = 'project_year';
+    return $columns;
+}
+add_filter( 'manage_edit-pricing_plan_sortable_columns', 'digital_agency_sortable_columns' );
+add_filter( 'manage_edit-testimonial_sortable_columns', 'digital_agency_sortable_columns' );
+add_filter( 'manage_edit-project_sortable_columns', 'digital_agency_sortable_columns' );
+
+function digital_agency_sortable_column_orderby( WP_Query $query ): void {
+    if ( ! is_admin() || ! $query->is_main_query() ) {
+        return;
+    }
+
+    $orderby = $query->get( 'orderby' );
+
+    if ( 'testi_rating' === $orderby ) {
+        $query->set( 'meta_key', '_agency_testimonial_rating' );
+        $query->set( 'orderby', 'meta_value_num' );
+    } elseif ( 'project_year' === $orderby ) {
+        $query->set( 'meta_key', '_agency_project_year' );
+        $query->set( 'orderby', 'meta_value' );
+    }
+}
+add_action( 'pre_get_posts', 'digital_agency_sortable_column_orderby' );
+
+// -----------------------------------------------------------------------------
+// 5.8 Admin Taxonomy Dropdown Filters
+// -----------------------------------------------------------------------------
+
+function digital_agency_restrict_manage_posts( string $post_type ): void {
+    if ( 'service' === $post_type ) {
+        $taxonomy = 'service_category';
+        $selected = isset( $_GET[ $taxonomy ] ) ? sanitize_text_field( wp_unslash( $_GET[ $taxonomy ] ) ) : '';
+        $info_taxonomy = get_taxonomy( $taxonomy );
+        if ( $info_taxonomy ) {
+            wp_dropdown_categories( array(
+                'show_option_all' => sprintf( __( 'All %s', 'digital-agency' ), $info_taxonomy->label ),
+                'taxonomy'        => $taxonomy,
+                'name'            => $taxonomy,
+                'orderby'         => 'name',
+                'selected'        => $selected,
+                'show_count'      => true,
+                'hide_empty'      => false,
+                'value_field'     => 'slug',
+            ) );
+        }
+    } elseif ( 'project' === $post_type ) {
+        $taxonomy = 'project_category';
+        $selected = isset( $_GET[ $taxonomy ] ) ? sanitize_text_field( wp_unslash( $_GET[ $taxonomy ] ) ) : '';
+        $info_taxonomy = get_taxonomy( $taxonomy );
+        if ( $info_taxonomy ) {
+            wp_dropdown_categories( array(
+                'show_option_all' => sprintf( __( 'All %s', 'digital-agency' ), $info_taxonomy->label ),
+                'taxonomy'        => $taxonomy,
+                'name'            => $taxonomy,
+                'orderby'         => 'name',
+                'selected'        => $selected,
+                'show_count'      => true,
+                'hide_empty'      => false,
+                'value_field'     => 'slug',
+            ) );
+        }
+    } elseif ( in_array( $post_type, array( 'team_member', 'career' ), true ) ) {
+        $taxonomy = 'department';
+        $selected = isset( $_GET[ $taxonomy ] ) ? sanitize_text_field( wp_unslash( $_GET[ $taxonomy ] ) ) : '';
+        $info_taxonomy = get_taxonomy( $taxonomy );
+        if ( $info_taxonomy ) {
+            wp_dropdown_categories( array(
+                'show_option_all' => sprintf( __( 'All %s', 'digital-agency' ), $info_taxonomy->label ),
+                'taxonomy'        => $taxonomy,
+                'name'            => $taxonomy,
+                'orderby'         => 'name',
+                'selected'        => $selected,
+                'show_count'      => true,
+                'hide_empty'      => false,
+                'value_field'     => 'slug',
+            ) );
+        }
+    }
+}
+add_action( 'restrict_manage_posts', 'digital_agency_restrict_manage_posts' );
+
 // =============================================================================
-// REST API FIRST-CLASS STRUCTURED FIELDS
+// 6. REST API FIRST-CLASS STRUCTURED FIELDS
 // =============================================================================
 
-/**
- * Register decoded, structured REST API fields for headless and dynamic block consumers
- */
 function digital_agency_register_rest_fields(): void {
     // 1. Service REST fields
     register_rest_field( 'service', 'gallery_images', array(
@@ -1153,4 +1591,3 @@ function digital_agency_register_rest_fields(): void {
     ) );
 }
 add_action( 'rest_api_init', 'digital_agency_register_rest_fields' );
-

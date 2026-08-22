@@ -17,7 +17,7 @@ $meta         = digital_agency_get_project_meta( $post_id );
 $terms        = get_the_terms( $post_id, 'project_category' );
 $term_str     = ( ! empty( $terms ) && ! is_wp_error( $terms ) ) ? $terms[0]->name : __( 'Case Study', 'digital-agency' );
 $related      = digital_agency_get_related_projects( $post_id, 2 );
-$gallery_imgs = digital_agency_get_gallery_images( $meta['gallery'] );
+$gallery_imgs = ! empty( $meta['gallery'] ) ? digital_agency_get_gallery_images( $meta['gallery'] ) : array();
 
 // Relational Testimonial Query
 $testimonial_post = null;

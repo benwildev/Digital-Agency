@@ -66,6 +66,49 @@ function digital_agency_editor_assets(): void {
 add_action( 'enqueue_block_editor_assets', 'digital_agency_editor_assets' );
 
 /**
+ * Enqueue scoped admin styles and scripts exclusively on theme management screens
+ *
+ * @param string $hook_suffix Current admin page hook suffix.
+ */
+function digital_agency_admin_assets( string $hook_suffix ): void {
+    $screen = get_current_screen();
+    if ( ! $screen ) {
+        return;
+    }
+
+    $theme_cpts = array( 'service', 'project', 'team_member', 'testimonial', 'pricing_plan', 'career' );
+    $is_cpt_edit = in_array( $screen->post_type, $theme_cpts, true ) && in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true );
+    $is_settings_page = ( 'appearance_page_agency-settings' === $hook_suffix );
+
+    if ( ! $is_cpt_edit && ! $is_settings_page ) {
+        return;
+    }
+
+    // Enqueue WordPress Media Library modal assets on gallery-supported post types
+    if ( in_array( $screen->post_type, array( 'service', 'project' ), true ) ) {
+        wp_enqueue_media();
+    }
+
+    // Scoped Admin Stylesheet
+    wp_enqueue_style(
+        'digital-agency-admin',
+        DIGITAL_AGENCY_URI . '/assets/css/admin.css',
+        array(),
+        DIGITAL_AGENCY_VERSION
+    );
+
+    // Scoped Admin JavaScript Engine (Vanilla JS)
+    wp_enqueue_script(
+        'digital-agency-admin',
+        DIGITAL_AGENCY_URI . '/assets/js/admin.js',
+        array(),
+        DIGITAL_AGENCY_VERSION,
+        true
+    );
+}
+add_action( 'admin_enqueue_scripts', 'digital_agency_admin_assets' );
+
+/**
  * Add preconnect resource hints for performance optimization
  *
  * @param array<string> $urls URLs to print for resource hints.
@@ -83,3 +126,4 @@ function digital_agency_resource_hints( array $urls, string $relation_type ): ar
     return $urls;
 }
 add_filter( 'wp_resource_hints', 'digital_agency_resource_hints', 10, 2 );
+

@@ -61,9 +61,9 @@ $pricing_query = digital_agency_get_pricing_plans();
 
                 <div style="margin-bottom:2.5rem;display:flex;align-items:baseline;gap:0.5rem;">
                   <span style="font-family:var(--wp--preset--font-family--syne);font-size:3rem;font-weight:800;color:<?php echo $featured ? 'var(--wp--preset--color--primary-accent)' : '#FFF'; ?>;line-height:1;">
-                    <?php echo esc_html( $meta['price'] ?: '$2,500' ); ?>
+                    <?php echo esc_html( $meta['price'] ?? '$2,500' ); ?>
                   </span>
-                  <span style="color:var(--wp--preset--color--text-light-muted);font-size:0.875rem;">/ <?php echo esc_html( $meta['billing_period'] ?: 'month' ); ?></span>
+                  <span style="color:var(--wp--preset--color--text-light-muted);font-size:0.875rem;">/ <?php echo esc_html( $meta['billing_period'] ?? $meta['period'] ?? 'month' ); ?></span>
                 </div>
 
                 <?php if ( ! empty( $meta['features'] ) && is_array( $meta['features'] ) ) : ?>
@@ -79,8 +79,8 @@ $pricing_query = digital_agency_get_pricing_plans();
               </div>
 
               <div>
-                <a href="<?php echo esc_url( $meta['button_url'] ?: home_url( '/contact/' ) ); ?>" class="wp-block-button__link wp-element-button" style="display:block;text-align:center;border-radius:12px;background:<?php echo $featured ? 'var(--wp--preset--color--primary-accent)' : 'transparent'; ?>;color:<?php echo $featured ? 'var(--wp--preset--color--surface-dark-base)' : '#FFF'; ?>;border:<?php echo $featured ? 'none' : '1px solid var(--wp--preset--color--border-dark-strong)'; ?>;font-weight:700;padding:1rem;text-decoration:none;transition:background 0.2s;">
-                  <?php echo esc_html( $meta['button_text'] ?: __( 'Get Started ↗', 'digital-agency' ) ); ?>
+                <a href="<?php echo esc_url( $meta['button_url'] ?? $meta['cta_url'] ?? home_url( '/contact/' ) ); ?>" class="wp-block-button__link wp-element-button" style="display:block;text-align:center;border-radius:12px;background:<?php echo $featured ? 'var(--wp--preset--color--primary-accent)' : 'transparent'; ?>;color:<?php echo $featured ? 'var(--wp--preset--color--surface-dark-base)' : '#FFF'; ?>;border:<?php echo $featured ? 'none' : '1px solid var(--wp--preset--color--border-dark-strong)'; ?>;font-weight:700;padding:1rem;text-decoration:none;transition:background 0.2s;">
+                  <?php echo esc_html( $meta['button_text'] ?? $meta['cta_text'] ?? __( 'Get Started ↗', 'digital-agency' ) ); ?>
                 </a>
               </div>
             </article>
